@@ -1,0 +1,12 @@
+{
+  "_comment": "Your daily warmup/practice schedule. These repeat every week.",
+  "events": [
+    { "day": "Monday", "title": "Team Practice", "time": "17:00", "priority": "Normal", "desc": "Contact trigger word. 1 utility for entry fragger." },
+    { "day": "Tuesday", "title": "Mechanics & AWP", "time": "16:00", "priority": "Normal", "desc": "Micro-correction aim, 3s AWP reset, 15s knife rule." },
+    { "day": "Wednesday", "title": "Application & Trading", "time": "17:00", "priority": "Normal", "desc": "Dead Man's Protocol. Pop-flash lineups." },
+    { "day": "Thursday", "title": "Team Practice", "time": "17:00", "priority": "Normal", "desc": "AWP/rifle decision making. Comm feedback." },
+    { "day": "Friday", "title": "VOD Review & Reset", "time": "16:00", "priority": "Normal", "desc": "Watch deaths and round starts. Light aim only." },
+    { "day": "Saturday", "title": "Competitive Grind", "time": "14:00", "priority": "Normal", "desc": "Full Golden Rules integration. Max 3 matches." },
+    { "day": "Sunday", "title": "Active Rest", "time": "12:00", "priority": "Normal", "desc": "10 min light aim. Watch pro VODs." }
+  ]
+}
