@@ -88,10 +88,27 @@ export function TeamHeatmap({ matches }: { matches: MatchEntry[] }) {
       </div>
 
       {/* View tabs */}
-      <div className="flex gap-1 rounded-xl border border-white/30 bg-white/40 p-0.5">
+      <div
+        role="tablist"
+        className="flex gap-1 rounded-xl border border-white/10 bg-white/5 p-0.5"
+        onKeyDown={(e) => {
+          const modes: ViewMode[] = ["map", "player", "opponent"];
+          const idx = modes.indexOf(view);
+          if (e.key === "ArrowRight") {
+            e.preventDefault();
+            setView(modes[(idx + 1) % modes.length]);
+          } else if (e.key === "ArrowLeft") {
+            e.preventDefault();
+            setView(modes[(idx - 1 + modes.length) % modes.length]);
+          }
+        }}
+      >
         {(["map", "player", "opponent"] as ViewMode[]).map((v) => (
           <button
             key={v}
+            role="tab"
+            aria-selected={view === v}
+            tabIndex={view === v ? 0 : -1}
             onClick={() => setView(v)}
             className={cn(
               "flex-1 rounded-lg py-1 text-[10px] font-bold capitalize transition-all",
@@ -104,7 +121,7 @@ export function TeamHeatmap({ matches }: { matches: MatchEntry[] }) {
       </div>
 
       {matches.length === 0 ? (
-        <div className="rounded-xl border border-white/30 bg-white/20 p-3 text-center text-[11px] text-inkDim/50">
+        <div className="rounded-xl border border-white/30 bg-white/20 p-3 text-center text-[11px] text-inkDim/70">
           No matches logged yet
         </div>
       ) : (
@@ -131,7 +148,7 @@ export function TeamHeatmap({ matches }: { matches: MatchEntry[] }) {
                 </div>
               </div>
               <div className="font-mono text-[10px]">{d.wins}W {d.losses}L</div>
-              <div className="font-mono text-[9px]">K/D {d.avgKd.toFixed(2)}</div>
+              <div className="font-mono text-[10px]">K/D {d.avgKd.toFixed(2)}</div>
             </div>
           ))}
 

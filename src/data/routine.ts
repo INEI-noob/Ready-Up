@@ -3,31 +3,31 @@ export type DayFocus = { title: string; desc: string };
 export const ROUTINE: Record<string, DayFocus> = {
   Monday: {
     title: "TEAM PRACTICE",
-    desc: "Focus on clear comms and coordinated plays. Call utility for your teammates.",
+    desc: "Focus on the 'Contact' trigger word. Call exactly 1 utility for your entry fragger.",
   },
   Tuesday: {
-    title: "MECHANICS & AIM",
-    desc: "Warm up your aim, practice crosshair placement, and work on movement.",
+    title: "MECHANICS & AWP",
+    desc: "Micro-correction aim, 3-second AWP reset, 15s knife rule.",
   },
   Wednesday: {
     title: "APPLICATION & TRADING",
-    desc: "Focus on trading kills, flashing for teammates, and map control.",
+    desc: "Dead Man's Protocol — info immediately on death. Pop-flash lineups.",
   },
   Thursday: {
     title: "TEAM PRACTICE",
-    desc: "Run set strategies and practice executes. Ask for feedback post-practice.",
+    desc: "AWP/rifle decision making. Ask your IGL for 1 piece of comm feedback post-practice.",
   },
   Friday: {
     title: "VOD REVIEW & RESET",
-    desc: "Review your gameplay, identify mistakes, and do light practice only.",
+    desc: "Watch your own deaths and round starts. Light aim only. No Premier.",
   },
   Saturday: {
     title: "COMPETITIVE GRIND",
-    desc: "Full integration of all Golden Rules. Play your best, stay focused.",
+    desc: "Full integration of all Golden Rules. Max 3 matches. Stop if tilted.",
   },
   Sunday: {
     title: "ACTIVE REST",
-    desc: "Light practice only. Watch pro matches, stay hydrated, recharge.",
+    desc: "10 minutes of light aim. Watch pro VODs. No Premier.",
   },
 };
 
@@ -39,10 +39,10 @@ export const FALLBACK_FOCUS: DayFocus = {
 export type Rule = { key: string; title: string; desc: string };
 
 export const RULES: Rule[] = [
-  { key: "comms", title: "Clear Comms", desc: "Keep communication concise and actionable." },
-  { key: "positioning", title: "Smart Positioning", desc: "Don't repeat the same angle twice in a row." },
-  { key: "utility", title: "Utility Usage", desc: "Use at least one piece of utility per round." },
-  { key: "mindset", title: "Stay Calm", desc: "Take a deep breath between rounds. Reset mentally." },
+  { key: "trigger", title: "Trigger word", desc: "Say CONTACT or INFO before any curse word." },
+  { key: "knife", title: "Knife rule", desc: "Knife goes away 15 seconds into the round. Period." },
+  { key: "awp", title: "AWP reset", desc: "Un-scope and check the minimap every 3 seconds." },
+  { key: "grip", title: "Grip check", desc: "Relax your hand — tension kills micro-adjustments." },
 ];
 
 export type MascotState = { caption: string; mouth: string };

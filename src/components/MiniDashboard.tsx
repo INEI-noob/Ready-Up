@@ -17,13 +17,13 @@ export function MiniDashboard({ state, checkedCount, onExpand }: {
 
   const avgKd = sessions.length > 0
     ? (sessions.slice(-5).reduce((a, s) => a + s.kd, 0) / Math.min(sessions.length, 5)).toFixed(2)
-    : "\u2014";
+    : "—";
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-3xl border border-pastelPink/20 bg-white/70 p-4 shadow-pastel backdrop-blur-sm"
+      className="rounded-3xl border border-pastelPink/20 bg-[rgba(25,22,40,0.75)] p-4 shadow-pastel backdrop-blur-sm"
     >
       {/* Top row: streak + expand */}
       <div className="mb-3 flex items-center justify-between">
@@ -33,20 +33,20 @@ export function MiniDashboard({ state, checkedCount, onExpand }: {
           </div>
           <div>
             <div className="text-lg font-extrabold leading-none text-ink">{state.streak}</div>
-            <div className="font-mono text-[8px] tracking-wider text-inkDim">STREAK</div>
+            <div className="font-mono text-[9px] tracking-wider text-inkDim">STREAK</div>
           </div>
         </div>
         <button
           onClick={onExpand}
-          className="rounded-full border border-pastelPink/20 bg-pastelPink/5 px-3 py-1 text-[10px] font-bold text-pastelPink transition-colors hover:bg-pastelPink/10"
+          className="rounded-xl border border-pastelPink/20 px-3 py-1.5 text-[12px] font-bold text-pastelPink transition-colors hover:bg-pastelPink/10"
         >
           Full view
         </button>
       </div>
 
       {/* Focus */}
-      <div className="mb-3 rounded-xl border border-white/30 bg-white/40 px-3 py-2">
-        <div className="font-mono text-[8px] tracking-wider text-inkDim">TODAY</div>
+      <div className="mb-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2">
+        <div className="font-mono text-[9px] tracking-wider text-inkDim">TODAY</div>
         <div className="text-[13px] font-bold text-gradient-blue">{focus.title}</div>
       </div>
 
@@ -80,22 +80,22 @@ export function MiniDashboard({ state, checkedCount, onExpand }: {
       <div className="flex gap-2">
         <div className="flex-1 rounded-xl border border-white/30 bg-white/30 px-2 py-1.5 text-center">
           <div className="text-[14px] font-bold text-ink">{avgKd}</div>
-          <div className="font-mono text-[7px] tracking-wider text-inkDim">AVG K/D</div>
+          <div className="font-mono text-[9px] tracking-wider text-inkDim">AVG K/D</div>
         </div>
         <div className="flex-1 rounded-xl border border-white/30 bg-white/30 px-2 py-1.5 text-center">
           <div className="text-[14px] font-bold text-ink">{sessions.length}</div>
-          <div className="font-mono text-[7px] tracking-wider text-inkDim">SESSIONS</div>
+          <div className="font-mono text-[9px] tracking-wider text-inkDim">SESSIONS</div>
         </div>
         <div className="flex-1 rounded-xl border border-white/30 bg-white/30 px-2 py-1.5 text-center">
           <div className="text-[14px] font-bold text-ink">{state.matches?.length || 0}</div>
-          <div className="font-mono text-[7px] tracking-wider text-inkDim">MATCHES</div>
+          <div className="font-mono text-[9px] tracking-wider text-inkDim">MATCHES</div>
         </div>
       </div>
 
       {/* Sparkline */}
       {kdTrend.length >= 2 && (
         <div className="mt-2 rounded-xl border border-white/30 bg-white/30 px-2 py-1.5">
-          <div className="mb-0.5 font-mono text-[7px] tracking-wider text-inkDim">K/D TREND</div>
+          <div className="mb-0.5 font-mono text-[9px] tracking-wider text-inkDim">K/D TREND</div>
           <Sparkline data={kdTrend} color="#FFB6D9" height={20} />
         </div>
       )}

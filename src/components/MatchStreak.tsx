@@ -46,8 +46,8 @@ export function MatchStreak({ matches }: { matches: MatchEntry[] }) {
     const streakCount = isWinStreak ? current.currentW : isLossStreak ? current.currentL : 0;
 
     return (
-      <div className="rounded-xl border border-white/40 bg-white/40 p-2.5">
-        <div className="mb-1.5 font-mono text-[9px] tracking-wider text-inkDim">{label}</div>
+      <div className="rounded-xl border border-white/10 bg-white/5 p-2.5">
+        <div className="mb-1.5 font-mono text-[10px] tracking-wider text-inkDim">{label}</div>
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-1.5">
@@ -62,10 +62,10 @@ export function MatchStreak({ matches }: { matches: MatchEntry[] }) {
                 "text-[13px] font-bold",
                 isWinStreak ? "text-okDark" : isLossStreak ? "text-pink" : "text-inkDim"
               )}>
-                {streakCount > 0 ? `${streakCount}${isWinStreak ? "W" : "L"}` : "\u2014"}
+                {streakCount > 0 ? `${streakCount}${isWinStreak ? "W" : "L"}` : "—"}
               </span>
             </div>
-            <div className="font-mono text-[8px] text-inkDim/60">
+            <div className="font-mono text-[9px] text-inkDim/80">
               {isWinStreak ? "WIN STREAK" : isLossStreak ? "LOSS STREAK" : "NO STREAK"}
             </div>
           </div>
@@ -73,12 +73,12 @@ export function MatchStreak({ matches }: { matches: MatchEntry[] }) {
             <div className="font-mono text-[10px] text-inkDim">
               <span className="text-okDark">{best.bestW}W</span> / <span className="text-pink">{best.bestL}L</span>
             </div>
-            <div className="font-mono text-[8px] text-inkDim/60">BEST</div>
+            <div className="font-mono text-[9px] text-inkDim/80">BEST</div>
           </div>
         </div>
         <div className="mt-1.5 flex gap-1">
-          <span className="rounded bg-pastelMint/15 px-1 py-0.5 font-mono text-[9px] font-bold text-okDark">{wins}W</span>
-          <span className="rounded bg-pastelPink/15 px-1 py-0.5 font-mono text-[9px] font-bold text-pink">{losses}L</span>
+          <span className="rounded bg-pastelMint/15 px-1 py-0.5 font-mono text-[10px] font-bold text-okDark">{wins}W</span>
+          <span className="rounded bg-pastelPink/15 px-1 py-0.5 font-mono text-[10px] font-bold text-pink">{losses}L</span>
         </div>
       </div>
     );
@@ -99,7 +99,7 @@ export function MatchStreak({ matches }: { matches: MatchEntry[] }) {
       </div>
 
       {matches.length === 0 ? (
-        <div className="rounded-xl border border-white/30 bg-white/20 p-3 text-center text-[11px] text-inkDim/50">
+        <div className="rounded-xl border border-white/30 bg-white/20 p-3 text-center text-[11px] text-inkDim/70">
           No matches logged yet
         </div>
       ) : (

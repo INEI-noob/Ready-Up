@@ -11,7 +11,7 @@ const buttonVariants = cva(
         ready:
           "bg-gradient-to-r from-pastelPink via-pastelLavender to-pastelBlue text-white shadow-pastel-lg hover:-translate-y-0.5 hover:shadow-pink-glow active:scale-[0.97]",
         idle:
-          "bg-white/60 text-inkDim border border-border cursor-not-allowed backdrop-blur-sm",
+          "bg-white/5 text-inkDim border border-white/10 cursor-not-allowed",
         ghost:
           "bg-transparent text-inkSoft hover:text-pastelPink hover:bg-pastelPink/10",
         cute:

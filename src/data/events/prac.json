@@ -1,8 +1,4 @@
 {
-  "events": [
-    { "date": "2026-01-05", "title": "Monday Practice", "time": "18:00", "priority": "High" },
-    { "date": "2026-01-12", "title": "Monday Practice", "time": "18:00", "priority": "High" },
-    { "date": "2026-01-19", "title": "Monday Practice", "time": "18:00", "priority": "High" },
-    { "date": "2026-01-26", "title": "Monday Practice", "time": "18:00", "priority": "High" }
-  ]
+  "_comment": "Add practice events here. priority: High = shows in Upcoming, Normal = calendar only.",
+  "events": []
 }

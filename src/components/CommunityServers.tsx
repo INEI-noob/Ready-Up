@@ -47,7 +47,7 @@ export function CommunityServers({
         </div>
         <button
           onClick={() => setShowCreate(!showCreate)}
-          className="flex items-center gap-1 rounded-full border border-pastelBlue/20 px-2 py-0.5 text-[10px] font-bold text-pastelBlue transition-colors hover:bg-pastelBlue/10"
+          className="flex items-center gap-1 rounded-xl border border-pastelPink/20 px-3 py-1.5 text-[12px] font-bold text-pastelPink transition-colors hover:bg-pastelPink/10"
         >
           <Plus className="h-3 w-3" /> New
         </button>
@@ -68,7 +68,7 @@ export function CommunityServers({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Server name..."
-                className="w-full rounded-lg border border-white/40 bg-white/50 px-2.5 py-1 text-[12px] text-ink outline-none placeholder:text-inkDim/40 focus:border-pastelBlue/40"
+                className="w-full rounded-xl border border-white/10 bg-[rgba(25,22,40,0.5)] px-3 py-2 text-[13px] text-ink outline-none placeholder:text-pastelPink/40 focus:border-pastelBlue/40 focus:ring-2 focus:ring-pastelPink/20"
               />
               <div className="flex gap-2">
                 <input
@@ -76,14 +76,14 @@ export function CommunityServers({
                   value={ip}
                   onChange={(e) => setIp(e.target.value)}
                   placeholder="IP address"
-                  className="flex-1 rounded-lg border border-white/40 bg-white/50 px-2.5 py-1 text-[12px] text-ink font-mono outline-none placeholder:text-inkDim/40 focus:border-pastelBlue/40"
+                  className="flex-1 rounded-xl border border-white/10 bg-[rgba(25,22,40,0.5)] px-3 py-1.5 text-[13px] text-ink font-mono outline-none placeholder:text-pastelPink/40 focus:border-pastelPink/40 focus:ring-2 focus:ring-pastelPink/20"
                 />
                 <input
                   type="text"
                   value={port}
                   onChange={(e) => setPort(e.target.value)}
                   placeholder="Port"
-                  className="w-20 rounded-lg border border-white/40 bg-white/50 px-2.5 py-1 text-[12px] text-ink font-mono outline-none placeholder:text-inkDim/40 focus:border-pastelBlue/40"
+                  className="w-20 rounded-xl border border-white/10 bg-[rgba(25,22,40,0.5)] px-3 py-1.5 text-[13px] text-ink font-mono outline-none placeholder:text-pastelPink/40 focus:border-pastelPink/40 focus:ring-2 focus:ring-pastelPink/20"
                 />
               </div>
               <div className="flex items-center gap-2">
@@ -93,20 +93,20 @@ export function CommunityServers({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Password (optional)"
-                  className="flex-1 rounded-lg border border-white/40 bg-white/50 px-2.5 py-1 text-[12px] text-ink font-mono outline-none placeholder:text-inkDim/40 focus:border-pastelBlue/40"
+                  className="flex-1 rounded-xl border border-white/10 bg-[rgba(25,22,40,0.5)] px-3 py-1.5 text-[13px] text-ink font-mono outline-none placeholder:text-pastelPink/40 focus:border-pastelPink/40 focus:ring-2 focus:ring-pastelPink/20"
                 />
               </div>
               <div className="flex gap-2">
                 <button
                   onClick={handleSave}
                   disabled={!name.trim() || !ip.trim() || !port.trim()}
-                  className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-gradient-to-r from-pastelBlue to-pastelLavender px-3 py-1.5 text-[11px] font-bold text-white transition-all hover:-translate-y-0.5 disabled:opacity-40"
+                  className="flex flex-1 items-center justify-center gap-1 rounded-xl bg-gradient-to-r from-pastelBlue to-pastelLavender px-3 py-1.5 text-[12px] font-bold text-white transition-all hover:-translate-y-0.5 disabled:opacity-40"
                 >
                   <Plus className="h-3 w-3" /> Save Server
                 </button>
                 <button
                   onClick={() => setShowCreate(false)}
-                  className="rounded-lg border border-white/40 bg-white/40 px-3 py-1.5 text-[11px] font-bold text-inkDim transition-colors hover:text-ink"
+                  className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-[12px] font-bold text-inkDim transition-colors hover:text-ink"
                 >
                   Cancel
                 </button>
@@ -122,20 +122,20 @@ export function CommunityServers({
           {servers.map((s) => {
             const isExpanded = expanded === s.id;
             return (
-              <div key={s.id} className="rounded-xl border border-white/40 bg-white/40 transition-all">
+              <div key={s.id} className="rounded-xl border border-white/10 bg-white/5 transition-all">
                 <div className="flex items-center gap-2 px-3 py-2">
                   <Globe className="h-3 w-3 text-pastelBlue" />
                   <div className="flex-1 min-w-0">
                     <div className="text-[12px] font-bold text-ink">{s.name}</div>
-                    <div className="font-mono text-[9px] text-inkDim">{s.ip}:{s.port}{s.password ? " (pw)" : ""}</div>
+                    <div className="font-mono text-[10px] text-inkDim">{s.ip}:{s.port}{s.password ? " (pw)" : ""}</div>
                   </div>
                   <button
                     onClick={() => onConnect(s.ip, s.port, s.password)}
-                    className="flex items-center gap-1 rounded-lg bg-gradient-to-r from-pastelBlue to-pastelLavender px-2.5 py-1 text-[10px] font-bold text-white transition-all hover:-translate-y-0.5"
+                    className="flex items-center gap-1 rounded-xl bg-gradient-to-r from-pastelBlue to-pastelLavender px-3 py-1.5 text-[12px] font-bold text-white transition-all hover:-translate-y-0.5"
                   >
                     <Plug className="h-3 w-3" /> Join
                   </button>
-                  <button onClick={() => setExpanded(isExpanded ? null : s.id)} className="text-inkDim/40 hover:text-inkDim">
+                   <button onClick={() => setExpanded(isExpanded ? null : s.id)} aria-expanded={isExpanded} className="text-inkDim/40 hover:text-inkDim">
                     {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
                   </button>
                 </div>
@@ -143,7 +143,7 @@ export function CommunityServers({
                   {isExpanded && (
                     <motion.div initial={{ height: 0 }} animate={{ height: "auto" }} exit={{ height: 0 }} className="overflow-hidden">
                       <div className="border-t border-white/30 px-3 py-2">
-                        <div className="mb-1 font-mono text-[9px] text-inkDim">
+                        <div className="mb-1 font-mono text-[10px] text-inkDim">
                           {s.ip}:{s.port}{s.password ? " / Password: " + s.password : ""}
                         </div>
                         <button onClick={() => onDelete(s.id)} className="flex items-center gap-1 text-[10px] text-inkDim/40 hover:text-pink transition-colors">
@@ -158,7 +158,7 @@ export function CommunityServers({
           })}
         </div>
       ) : (
-        <div className="rounded-xl border border-white/30 bg-white/20 p-3 text-center text-[11px] text-inkDim/50">
+        <div className="rounded-xl border border-white/10 bg-white/5 p-3 text-center text-[11px] text-inkDim/70">
           No servers saved — add one to quick-connect
         </div>
       )}

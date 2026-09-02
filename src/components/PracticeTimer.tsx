@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Timer, Play, Pause, RotateCcw, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { PracticeTimerState } from "@/vite-env";
 
 type TimerPhase = "aim" | "utility" | "clutch" | "rest";
 
@@ -14,18 +15,35 @@ const PHASES: Record<TimerPhase, { label: string; duration: number; color: strin
 
 const PHASE_ORDER: TimerPhase[] = ["aim", "utility", "clutch", "rest"];
 
-export function PracticeTimer() {
-  const [running, setRunning] = useState(false);
-  const [phaseIndex, setPhaseIndex] = useState(0);
-  const [remaining, setRemaining] = useState(PHASES.aim.duration);
+const DEFAULT_DURATIONS: Record<TimerPhase, number> = {
+  aim: 300,
+  utility: 300,
+  clutch: 300,
+  rest: 60,
+};
+
+export function PracticeTimer({ timerState, onTimerChange }: {
+  timerState?: PracticeTimerState;
+  onTimerChange?: (s: PracticeTimerState) => void;
+}) {
+  // Calculate elapsed time if timer was running when app closed
+  const initialRemaining = (() => {
+    if (!timerState?.running || !timerState?.lastTick) return timerState?.remaining ?? PHASES.aim.duration;
+    const elapsed = Math.floor((Date.now() - timerState.lastTick) / 1000);
+    return Math.max(0, timerState.remaining - elapsed);
+  })();
+
+  const initialRunning = timerState?.running && initialRemaining > 0;
+
+  const [running, setRunning] = useState(initialRunning);
+  const [phaseIndex, setPhaseIndex] = useState(timerState?.phase ?? 0);
+  const [remaining, setRemaining] = useState(initialRemaining);
   const [expanded, setExpanded] = useState(false);
-  const [customDurations, setCustomDurations] = useState<Record<TimerPhase, number>>({
-    aim: 300,
-    utility: 300,
-    clutch: 300,
-    rest: 60,
-  });
+  const [customDurations, setCustomDurations] = useState<Record<TimerPhase, number>>(
+    timerState?.customDurations as Record<TimerPhase, number> ?? DEFAULT_DURATIONS
+  );
   const intervalRef = useRef<number | null>(null);
+  const persistRef = useRef<ReturnType<typeof setTimeout>>();
 
   const currentPhase = PHASE_ORDER[phaseIndex];
   const phaseConfig = PHASES[currentPhase];
@@ -33,6 +51,21 @@ export function PracticeTimer() {
   const totalElapsed = PHASE_ORDER.slice(0, phaseIndex).reduce((sum, p) => sum + customDurations[p], 0) + (customDurations[currentPhase] - remaining);
   const totalDuration = Object.values(customDurations).reduce((a, b) => a + b, 0);
   const progress = totalDuration > 0 ? (totalElapsed / totalDuration) * 100 : 0;
+
+  // Persist state changes (debounced)
+  const persist = useCallback(() => {
+    if (!onTimerChange) return;
+    const snapshot = { phase: phaseIndex, remaining, running: !!running, customDurations, lastTick: Date.now() };
+    clearTimeout(persistRef.current);
+    persistRef.current = setTimeout(() => {
+      onTimerChange(snapshot);
+    }, 300);
+  }, [phaseIndex, remaining, running, customDurations, onTimerChange]);
+
+  useEffect(() => {
+    persist();
+    return () => clearTimeout(persistRef.current);
+  }, [phaseIndex, remaining, running, customDurations]);
 
   useEffect(() => {
     if (!running) {
@@ -43,7 +76,6 @@ export function PracticeTimer() {
     intervalRef.current = window.setInterval(() => {
       setRemaining((prev) => {
         if (prev <= 1) {
-          // Move to next phase
           setPhaseIndex((pi) => {
             const next = pi + 1;
             if (next >= PHASE_ORDER.length) {
@@ -96,7 +128,7 @@ export function PracticeTimer() {
       </div>
 
       {/* Main timer display */}
-      <div className="rounded-xl border border-white/40 bg-white/40 p-3 text-center">
+      <div className="rounded-xl border border-white/10 bg-white/5 p-3 text-center">
         <div className={cn("font-mono text-[10px] tracking-wider", phaseConfig.color)}>{phaseConfig.label}</div>
         <div className="my-1 font-display text-3xl font-bold text-ink">{formatTime(remaining)}</div>
 
@@ -130,7 +162,7 @@ export function PracticeTimer() {
           )}>
             {running ? <><Pause className="h-3 w-3" /> Pause</> : <><Play className="h-3 w-3" /> Start</>}
           </button>
-          <button onClick={reset} className="flex items-center justify-center rounded-xl border border-white/40 bg-white/40 px-3 text-inkDim transition-colors hover:text-ink">
+          <button onClick={reset} className="flex items-center justify-center rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-[12px] text-inkDim transition-colors hover:text-ink">
             <RotateCcw className="h-3 w-3" />
           </button>
         </div>
@@ -140,14 +172,14 @@ export function PracticeTimer() {
       <AnimatePresence>
         {expanded && (
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
-            <div className="space-y-1.5 rounded-xl border border-white/40 bg-white/40 p-2.5">
+            <div className="space-y-1.5 rounded-xl border border-white/10 bg-white/5 p-2.5">
               {PHASE_ORDER.map((p) => (
                 <div key={p} className="flex items-center gap-2">
                   <span className={cn("w-16 text-[10px] font-bold", PHASES[p].color)}>{PHASES[p].label}</span>
                   <div className="flex flex-1 items-center gap-1">
-                    <button onClick={() => updateDuration(p, Math.max(15, customDurations[p] - 30))} className="h-5 w-5 rounded border border-white/40 bg-white/50 text-[10px] text-inkDim hover:text-ink">-</button>
+                    <button onClick={() => updateDuration(p, Math.max(15, customDurations[p] - 30))} className="h-5 w-5 rounded border border-white/10 bg-white/5 text-[10px] text-inkDim hover:text-ink">-</button>
                     <span className="flex-1 text-center font-mono text-[11px] text-ink">{formatTime(customDurations[p])}</span>
-                    <button onClick={() => updateDuration(p, customDurations[p] + 30)} className="h-5 w-5 rounded border border-white/40 bg-white/50 text-[10px] text-inkDim hover:text-ink">+</button>
+                    <button onClick={() => updateDuration(p, customDurations[p] + 30)} className="h-5 w-5 rounded border border-white/10 bg-white/5 text-[10px] text-inkDim hover:text-ink">+</button>
                   </div>
                 </div>
               ))}

@@ -59,7 +59,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     <ToastContext.Provider value={{ toast }}>
       {children}
       {/* Toast container */}
-      <div className="fixed right-4 top-4 z-[100] flex flex-col gap-2">
+      <div className="fixed right-4 top-4 z-[100] flex flex-col gap-2" role="status" aria-live="polite">
         <AnimatePresence>
           {toasts.map((t) => (
             <ToastItem key={t.id} entry={t} onDismiss={() => dismiss(t.id)} />

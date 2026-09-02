@@ -31,11 +31,12 @@ export function RuleCard({
           onClick={onToggle}
           whileTap={{ scale: 0.9 }}
           whileHover={{ scale: 1.08 }}
+          aria-pressed={checked}
           className={cn(
-            "relative z-10 flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 transition-all duration-300",
+            "relative z-10 flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 transition-all duration-300 focus-visible:ring-2 focus-visible:ring-pastelPink focus-visible:ring-offset-2",
             checked
               ? "border-transparent bg-gradient-to-br from-pastelPink to-pastelLavender shadow-pastel"
-              : "border-pastelPink/30 bg-white/80 hover:border-pastelPink hover:shadow-[0_0_12px_rgba(255,182,217,0.25)]"
+              : "border-pastelPink/30 bg-[rgba(25,22,40,0.5)] hover:border-pastelPink hover:shadow-[0_0_12px_rgba(255,182,217,0.25)]"
           )}
         >
           {checked ? (
@@ -47,7 +48,7 @@ export function RuleCard({
               <Check className="h-5 w-5 text-white" strokeWidth={3} />
             </motion.div>
           ) : (
-            <span className="font-display text-sm font-bold text-pastelPink/60">
+            <span className="font-display text-sm font-bold text-pastelPink/80">
               {index + 1}
             </span>
           )}
@@ -72,17 +73,17 @@ export function RuleCard({
         onClick={onToggle}
         whileTap={{ scale: 0.98 }}
         className={cn(
-          "mb-2 flex flex-1 cursor-pointer select-none items-center gap-3 rounded-2xl border px-4 py-3.5 transition-all duration-300",
+          "mb-2 flex flex-1 cursor-pointer select-none items-center gap-3 rounded-2xl border px-4 py-3.5 transition-all duration-300 focus-visible:ring-2 focus-visible:ring-pastelPink focus-visible:ring-offset-2 min-h-[48px]",
           checked
-            ? "border-pastelPink/20 bg-gradient-to-r from-pastelPink/10 via-white/60 to-pastelLavender/10 shadow-pastel"
-            : "border-white/40 bg-white/50 hover:border-pastelPink/30 hover:bg-white/70 hover:shadow-pastel"
+            ? "border-pastelPink/20 bg-gradient-to-r from-pastelPink/10 via-[rgba(25,22,40,0.3)] to-pastelLavender/10 shadow-pastel"
+            : "border-white/10 bg-white/5 hover:border-pastelPink/30 hover:bg-white/10 hover:shadow-pastel"
         )}
       >
         <div className="flex-1 min-w-0">
           <strong
             className={cn(
               "block text-[15px] font-bold leading-snug transition-colors duration-300",
-              checked ? "text-pastelLavender" : "text-ink"
+              checked ? "text-purple-500" : "text-ink"
             )}
           >
             {rule.title}

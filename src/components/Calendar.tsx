@@ -147,11 +147,13 @@ function parseWeeklyEvents(
   return events;
 }
 
-export function Calendar({ onQuickAdd }: { onQuickAdd?: (type: "scrim" | "official") => void }) {
+export function Calendar({ onQuickAdd, selectedDate: controlledDate, onDateSelect }: { onQuickAdd?: (type: "scrim" | "official") => void; selectedDate?: string | null; onDateSelect?: (date: string | null) => void }) {
   const today = useMemo(() => new Date(), []);
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [internalDate, setInternalDate] = useState<string | null>(null);
+  const selectedDate = controlledDate !== undefined ? controlledDate : internalDate;
+  const setSelectedDate = onDateSelect || setInternalDate;
 
   const events = useMemo(() => {
     const monthDates = getMonthDateRange(currentYear, currentMonth);
@@ -227,7 +229,7 @@ export function Calendar({ onQuickAdd }: { onQuickAdd?: (type: "scrim" | "offici
   const eventTypes = Object.keys(EVENT_COLORS) as EventType[];
 
   return (
-    <div className="rounded-3xl border border-pastelPink/20 bg-white/70 p-5 shadow-pastel backdrop-blur-sm">
+    <div className="rounded-3xl border border-pastelPink/20 bg-[rgba(25,22,40,0.9)] p-5 shadow-pastel backdrop-blur-sm">
       {/* Month nav */}
       <div className="mb-4 flex items-center justify-between">
         <motion.button
@@ -250,11 +252,13 @@ export function Calendar({ onQuickAdd }: { onQuickAdd?: (type: "scrim" | "offici
       </div>
 
       {/* Weekday headers */}
-      <div className="mb-1 grid grid-cols-7 gap-1">
+      <div className="mb-1 grid grid-cols-7 gap-1" role="row">
         {WEEKDAYS.map((day) => (
           <div
             key={day}
             className="py-1 text-center font-mono text-[10px] font-semibold tracking-wider text-inkDim"
+            role="columnheader"
+            aria-label={day}
           >
             {day}
           </div>
@@ -262,7 +266,30 @@ export function Calendar({ onQuickAdd }: { onQuickAdd?: (type: "scrim" | "offici
       </div>
 
       {/* Calendar grid */}
-      <div className="grid grid-cols-7 gap-1">
+      <div
+        className="grid grid-cols-7 gap-1"
+        role="grid"
+        aria-label="Calendar"
+        onKeyDown={(e) => {
+          if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) return;
+          e.preventDefault();
+
+          const cells = Array.from(
+            (e.currentTarget as HTMLElement).querySelectorAll<HTMLElement>('[role="gridcell"]')
+          );
+          const current = document.activeElement as HTMLElement;
+          const idx = cells.indexOf(current);
+          if (idx < 0) return;
+
+          let next = idx;
+          if (e.key === "ArrowRight") next = Math.min(idx + 1, cells.length - 1);
+          else if (e.key === "ArrowLeft") next = Math.max(idx - 1, 0);
+          else if (e.key === "ArrowDown") next = Math.min(idx + 7, cells.length - 1);
+          else if (e.key === "ArrowUp") next = Math.max(idx - 7, 0);
+
+          cells[next]?.focus();
+        }}
+      >
         {calendarDays.map((day, i) => {
           if (day === null) return <div key={`empty-${i}`} />;
 
@@ -272,15 +299,26 @@ export function Calendar({ onQuickAdd }: { onQuickAdd?: (type: "scrim" | "offici
           const isSelected = dateKey === selectedDate;
           const hasEvents = dayEvents.length > 0;
 
+          const fullDateLabel = new Date(currentYear, currentMonth, day).toLocaleDateString("en-US", {
+            weekday: "long",
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+          });
+
           return (
             <motion.button
               key={dateKey}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => setSelectedDate(isSelected ? null : dateKey)}
+              role="gridcell"
+              aria-label={fullDateLabel}
+              aria-selected={isSelected}
+              tabIndex={isToday ? 0 : -1}
               className={cn(
-                "relative flex h-9 w-full flex-col items-center justify-center rounded-xl text-[13px] font-medium transition-all duration-200",
-                isToday && !isSelected && "bg-pastelPink/15 font-bold text-pastelPink",
+                "relative flex h-10 w-full flex-col items-center justify-center rounded-xl text-[13px] font-medium transition-all duration-200",
+                isToday && !isSelected && "bg-pastelPink/20 font-bold text-pink",
                 isSelected && "bg-gradient-to-br from-pastelPink to-pastelLavender font-bold text-white shadow-pastel",
                 !isToday && !isSelected && "text-ink hover:bg-pastelPink/5",
                 hasEvents && !isSelected && "font-bold"
@@ -293,7 +331,7 @@ export function Calendar({ onQuickAdd }: { onQuickAdd?: (type: "scrim" | "offici
                     <div
                       key={j}
                       className={cn(
-                        "h-1 w-1 rounded-full",
+                        "h-1.5 w-1.5 rounded-full",
                         isSelected ? "bg-white/80" : EVENT_COLORS[evt.type].dot
                       )}
                     />
@@ -351,7 +389,7 @@ export function Calendar({ onQuickAdd }: { onQuickAdd?: (type: "scrim" | "offici
                   {onQuickAdd && selectedEvents.some((e) => e.type === "Scrim" || e.type === "Official") && selectedDate! <= todayISO() && (
                     <button
                       onClick={() => onQuickAdd(selectedEvents.some((e) => e.type === "Official") ? "official" : "scrim")}
-                      className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg border border-pastelPink/20 bg-pastelPink/5 px-3 py-1.5 text-[11px] font-bold text-pastelPink transition-colors hover:bg-pastelPink/10"
+                      className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl border border-pastelPink/20 px-3 py-1.5 text-[12px] font-bold text-pastelPink transition-colors hover:bg-pastelPink/10"
                     >
                       <PenLine className="h-3 w-3" />
                       Log match result
@@ -359,7 +397,7 @@ export function Calendar({ onQuickAdd }: { onQuickAdd?: (type: "scrim" | "offici
                   )}
                 </div>
               ) : (
-                <div className="text-[12px] text-inkDim/60">No events scheduled</div>
+                <div className="text-[12px] text-inkDim/80">No events scheduled</div>
               )}
             </div>
           </motion.div>
@@ -402,7 +440,7 @@ export function Calendar({ onQuickAdd }: { onQuickAdd?: (type: "scrim" | "offici
                   </div>
                   <span
                     className={cn(
-                      "shrink-0 rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider",
+                      "shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider",
                       colors.bg,
                       colors.text
                     )}
@@ -414,7 +452,7 @@ export function Calendar({ onQuickAdd }: { onQuickAdd?: (type: "scrim" | "offici
             })}
           </div>
         ) : (
-          <div className="rounded-xl border border-white/40 bg-white/30 p-3 text-center text-[12px] text-inkDim/60">
+          <div className="rounded-xl border border-white/40 bg-white/30 p-3 text-center text-[12px] text-inkDim/80">
             No upcoming events
           </div>
         )}
@@ -425,7 +463,7 @@ export function Calendar({ onQuickAdd }: { onQuickAdd?: (type: "scrim" | "offici
         {eventTypes.map((type) => (
           <div key={type} className="flex items-center gap-1.5">
             <div className={cn("h-2 w-2 rounded-full", EVENT_COLORS[type].dot)} />
-            <span className="font-mono text-[9px] tracking-wider text-inkDim uppercase">
+            <span className="font-mono text-[10px] tracking-wider text-inkDim uppercase">
               {type}
             </span>
           </div>

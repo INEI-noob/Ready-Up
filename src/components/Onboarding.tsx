@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ArrowLeft, Check, Swords } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowRight, ArrowLeft, Check, Swords, Heart, X, Plus } from "lucide-react";
 import { RULES } from "@/data/routine";
 
 const STEPS = ["welcome", "roster", "rules", "done"] as const;
@@ -47,17 +47,14 @@ export function Onboarding({ onComplete }: { onComplete: (roster: string[]) => v
   const canProceed = step === "roster" ? roster.filter(Boolean).length >= 1 : true;
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Onboarding"
       className="fixed inset-0 z-[90] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
     >
-      <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
-        className="w-full max-w-md overflow-hidden rounded-3xl border border-pastelPink/20 bg-white p-6 shadow-pastel-lg"
+      <div
+        className="w-full max-w-md overflow-hidden rounded-3xl border border-pastelPink/20 bg-[rgba(25,22,40,0.95)] p-6 shadow-pastel-lg"
       >
         {/* Progress dots */}
         <div className="mb-6 flex items-center justify-center gap-2">
@@ -81,7 +78,9 @@ export function Onboarding({ onComplete }: { onComplete: (roster: string[]) => v
           >
             {step === "welcome" && (
               <div className="text-center">
-                <div className="mb-4 text-5xl">🩷</div>
+                <div className="mb-4 flex justify-center">
+                  <Heart className="h-12 w-12 text-pastelPink" fill="currentColor" />
+                </div>
                 <h2 className="mb-2 font-display text-2xl font-bold text-gradient-pink">Welcome to Ready Up</h2>
                 <p className="mb-1 text-[14px] text-inkSoft">Your pre-game ritual launcher for CS2.</p>
                 <p className="text-[13px] text-inkDim">Let's get you set up in 30 seconds.</p>
@@ -101,10 +100,10 @@ export function Onboarding({ onComplete }: { onComplete: (roster: string[]) => v
                         value={p}
                         onChange={(e) => updatePlayer(i, e.target.value)}
                         placeholder={`Player ${i + 1}`}
-                        className="flex-1 rounded-xl border border-white/40 bg-white/50 px-3 py-1.5 text-[13px] text-ink outline-none placeholder:text-inkDim/40 focus:border-pastelPink/40"
+                        className="flex-1 rounded-xl border border-white/10 bg-[rgba(25,22,40,0.5)] px-3 py-1.5 text-[13px] text-ink outline-none placeholder:text-pastelPink/40 focus:border-pastelPink/40 focus:ring-2 focus:ring-pastelPink/20"
                       />
                       {p && (
-                        <button onClick={() => removePlayer(i)} className="text-inkDim/40 hover:text-pink text-[12px]">x</button>
+                        <button onClick={() => removePlayer(i)} className="text-inkDim/40 hover:text-pink transition-colors"><X className="h-3.5 w-3.5" /></button>
                       )}
                     </div>
                   ))}
@@ -117,12 +116,12 @@ export function Onboarding({ onComplete }: { onComplete: (roster: string[]) => v
                       onChange={(e) => setNewPlayer(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && addPlayer()}
                       placeholder="Add player..."
-                      className="flex-1 rounded-xl border border-white/40 bg-white/50 px-3 py-1.5 text-[13px] text-ink outline-none placeholder:text-inkDim/40 focus:border-pastelPink/40"
+                      className="flex-1 rounded-xl border border-white/10 bg-[rgba(25,22,40,0.5)] px-3 py-1.5 text-[13px] text-ink outline-none placeholder:text-pastelPink/40 focus:border-pastelPink/40 focus:ring-2 focus:ring-pastelPink/20"
                     />
-                    <button onClick={addPlayer} className="rounded-xl border border-pastelPink/20 px-3 py-1.5 text-[12px] font-bold text-pastelPink hover:bg-pastelPink/10">+ Add</button>
+                    <button onClick={addPlayer} className="flex items-center gap-1 rounded-xl border border-pastelPink/20 px-3 py-1.5 text-[12px] font-bold text-pastelPink transition-colors hover:bg-pastelPink/10"><Plus className="h-3 w-3" /> Add</button>
                   </div>
                 )}
-                <p className="text-[11px] text-inkDim/50">You can skip this and add later from the Roster button in Stats.</p>
+                <p className="text-[11px] text-inkDim/70">You can skip this and add later from the Roster button in Stats.</p>
               </div>
             )}
 
@@ -132,7 +131,7 @@ export function Onboarding({ onComplete }: { onComplete: (roster: string[]) => v
                 <p className="mb-3 text-[12px] text-inkDim">These are the 4 habits you'll lock in before every session.</p>
                 <div className="space-y-2">
                   {RULES.map((rule, i) => (
-                    <div key={rule.key} className="flex items-start gap-3 rounded-xl border border-white/40 bg-white/50 px-3 py-2.5">
+                    <div key={rule.key} className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5">
                       <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-pastelPink/20 to-pastelLavender/20 font-display text-xs font-bold text-pastelPink">
                         {i + 1}
                       </div>
@@ -163,7 +162,7 @@ export function Onboarding({ onComplete }: { onComplete: (roster: string[]) => v
         {/* Navigation */}
         <div className="mt-6 flex items-center justify-between">
           {stepIndex > 0 && step !== "done" ? (
-            <button onClick={prev} className="flex items-center gap-1 text-[13px] font-bold text-inkDim transition-colors hover:text-ink">
+            <button onClick={prev} className="flex items-center gap-1 text-[12px] font-bold text-inkDim transition-colors hover:text-ink">
               <ArrowLeft className="h-3.5 w-3.5" /> Back
             </button>
           ) : (
@@ -173,7 +172,7 @@ export function Onboarding({ onComplete }: { onComplete: (roster: string[]) => v
           {step === "done" ? (
             <button
               onClick={handleFinish}
-              className="flex items-center gap-2 rounded-full bg-gradient-to-r from-pastelPink via-pastelLavender to-pastelBlue px-6 py-2.5 font-display text-sm font-bold text-white shadow-pastel transition-all hover:-translate-y-0.5 hover:shadow-pastel-lg"
+              className="flex items-center gap-2 rounded-full bg-gradient-to-r from-pastelPink via-pastelLavender to-pastelBlue px-5 py-2.5 font-display text-sm font-bold text-white shadow-pastel transition-all hover:-translate-y-0.5 hover:shadow-pastel-lg"
             >
               <Swords className="h-4 w-4" /> Let's go
             </button>
@@ -187,7 +186,7 @@ export function Onboarding({ onComplete }: { onComplete: (roster: string[]) => v
             </button>
           )}
         </div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }

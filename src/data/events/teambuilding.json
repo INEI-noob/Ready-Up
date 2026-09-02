@@ -1,5 +1,4 @@
 {
-  "events": [
-    { "date": "2026-01-11", "title": "Team Building", "time": "16:00", "priority": "Normal" }
-  ]
+  "_comment": "Add teambuilding events here. priority: High = shows in Upcoming, Normal = calendar only.",
+  "events": []
 }

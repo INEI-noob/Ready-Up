@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
-import type { ReadyUpState, SessionEntry, MatchEntry, RuleTemplate, LaunchProfile, Achievement, SoundId, CommunityServer } from "@/vite-env";
+import type { ReadyUpState, SessionEntry, MatchEntry, RuleTemplate, LaunchProfile, Achievement, SoundId, CommunityServer, PracticeTimerState } from "@/vite-env";
 
-const LS_KEY = "readyup-state";
+const LS_KEY = "cs2-readyup-state";
 const DEFAULT_STATE: ReadyUpState = {
   streak: 0,
   lastDate: null,
@@ -10,7 +10,6 @@ const DEFAULT_STATE: ReadyUpState = {
   matches: [],
   ruleStats: {},
   teamRoster: [],
-  darkMode: false,
   onboardingComplete: false,
   ruleTemplates: [],
   archivedSessions: [],
@@ -20,9 +19,14 @@ const DEFAULT_STATE: ReadyUpState = {
   achievements: [],
   soundId: "chime",
   servers: [],
+  sidebarTab: "schedule",
+  calendarDate: null,
+  dailyRules: { date: "", checked: [] },
+  practiceTimer: { phase: 0, remaining: 300, running: false, customDurations: {}, lastTick: null },
 };
 
-function readState(): ReadyUpState {
+async function readState(): Promise<ReadyUpState> {
+  if (window.api) return window.api.getState();
   try {
     const raw = localStorage.getItem(LS_KEY);
     if (!raw) return DEFAULT_STATE;
@@ -38,14 +42,23 @@ function readState(): ReadyUpState {
       archivedSessions: parsed.archivedSessions ?? [],
       launchProfiles: parsed.launchProfiles ?? [],
       achievements: parsed.achievements ?? [],
+      soundId: parsed.soundId ?? "chime",
       servers: parsed.servers ?? [],
+      sidebarTab: parsed.sidebarTab ?? "schedule",
+      calendarDate: parsed.calendarDate ?? null,
+      dailyRules: parsed.dailyRules ?? { date: "", checked: [] },
+      practiceTimer: parsed.practiceTimer ?? { phase: 0, remaining: 300, running: false, customDurations: {}, lastTick: null },
     };
   } catch {
     return DEFAULT_STATE;
   }
 }
 
-function writeState(state: ReadyUpState): void {
+async function writeState(state: ReadyUpState): Promise<void> {
+  if (window.api) {
+    await window.api.setState(state);
+    return;
+  }
   try {
     localStorage.setItem(LS_KEY, JSON.stringify(state));
   } catch {
@@ -71,12 +84,14 @@ export function useReadyUpState() {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    setState(readState());
-    setLoaded(true);
+    readState().then((s) => {
+      setState(s);
+      setLoaded(true);
+    });
   }, []);
 
-  const commitToday = useCallback((dayName: string, checkedRules: string[]) => {
-    const current = readState();
+  const commitToday = useCallback(async (dayName: string, checkedRules: string[]) => {
+    const current = await readState();
     const today = todayISO();
 
     let streak = current.streak || 0;
@@ -101,13 +116,13 @@ export function useReadyUpState() {
       ruleStats,
     };
 
-    writeState(next);
+    await writeState(next);
     setState(next);
     return next;
   }, []);
 
-  const addSession = useCallback((session: Omit<SessionEntry, "date">) => {
-    const current = readState();
+  const addSession = useCallback(async (session: Omit<SessionEntry, "date">) => {
+    const current = await readState();
     const entry: SessionEntry = {
       ...session,
       date: new Date().toISOString(),
@@ -116,13 +131,13 @@ export function useReadyUpState() {
       ...current,
       sessions: [...(current.sessions || []), entry].slice(-99),
     };
-    writeState(next);
+    await writeState(next);
     setState(next);
     return next;
   }, []);
 
-  const addMatch = useCallback((match: Omit<MatchEntry, "id" | "date">) => {
-    const current = readState();
+  const addMatch = useCallback(async (match: Omit<MatchEntry, "id" | "date">) => {
+    const current = await readState();
     const entry: MatchEntry = {
       ...match,
       id: generateId(),
@@ -132,60 +147,53 @@ export function useReadyUpState() {
       ...current,
       matches: [...(current.matches || []), entry].slice(-199),
     };
-    writeState(next);
+    await writeState(next);
     setState(next);
     return next;
   }, []);
 
-  const deleteMatch = useCallback((id: string) => {
-    const current = readState();
+  const deleteMatch = useCallback(async (id: string) => {
+    const current = await readState();
     const next: ReadyUpState = {
       ...current,
       matches: (current.matches || []).filter((m) => m.id !== id),
     };
-    writeState(next);
+    await writeState(next);
     setState(next);
     return next;
   }, []);
 
-  const setTeamRoster = useCallback((roster: string[]) => {
-    const current = readState();
+  const setTeamRoster = useCallback(async (roster: string[]) => {
+    const current = await readState();
     const next: ReadyUpState = { ...current, teamRoster: roster };
-    writeState(next);
+    await writeState(next);
     setState(next);
   }, []);
 
-  const toggleDarkMode = useCallback(() => {
-    const current = readState();
-    const next: ReadyUpState = { ...current, darkMode: !current.darkMode };
-    writeState(next);
-    setState(next);
-  }, []);
-
-  const setOnboardingComplete = useCallback((roster: string[]) => {
-    const current = readState();
+  const setOnboardingComplete = useCallback(async (roster: string[]) => {
+    const current = await readState();
     const next: ReadyUpState = { ...current, onboardingComplete: true, teamRoster: roster };
-    writeState(next);
+    await writeState(next);
     setState(next);
   }, []);
 
-  const saveRuleTemplate = useCallback((template: RuleTemplate) => {
-    const current = readState();
+  const saveRuleTemplate = useCallback(async (template: RuleTemplate) => {
+    const current = await readState();
     const existing = (current.ruleTemplates || []).filter((t) => t.name !== template.name);
     const next: ReadyUpState = { ...current, ruleTemplates: [...existing, template] };
-    writeState(next);
+    await writeState(next);
     setState(next);
   }, []);
 
-  const deleteRuleTemplate = useCallback((name: string) => {
-    const current = readState();
+  const deleteRuleTemplate = useCallback(async (name: string) => {
+    const current = await readState();
     const next: ReadyUpState = { ...current, ruleTemplates: (current.ruleTemplates || []).filter((t) => t.name !== name) };
-    writeState(next);
+    await writeState(next);
     setState(next);
   }, []);
 
-  const archiveOldSessions = useCallback(() => {
-    const current = readState();
+  const archiveOldSessions = useCallback(async () => {
+    const current = await readState();
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - 90);
     const cutoffStr = cutoff.toISOString();
@@ -200,81 +208,81 @@ export function useReadyUpState() {
       sessions: remaining,
       archivedSessions: [...(current.archivedSessions || []), ...toArchive].slice(-500),
     };
-    writeState(next);
+    await writeState(next);
     setState(next);
   }, []);
 
-  const setViewMode = useCallback((mode: "full" | "mini") => {
-    const current = readState();
+  const setViewMode = useCallback(async (mode: "full" | "mini") => {
+    const current = await readState();
     const next: ReadyUpState = { ...current, viewMode: mode };
-    writeState(next);
+    await writeState(next);
     setState(next);
   }, []);
 
-  const saveLaunchProfile = useCallback((profile: LaunchProfile) => {
-    const current = readState();
+  const saveLaunchProfile = useCallback(async (profile: LaunchProfile) => {
+    const current = await readState();
     const existing = (current.launchProfiles || []).filter((p) => p.id !== profile.id);
     const next: ReadyUpState = { ...current, launchProfiles: [...existing, profile] };
-    writeState(next);
+    await writeState(next);
     setState(next);
   }, []);
 
-  const deleteLaunchProfile = useCallback((id: string) => {
-    const current = readState();
+  const deleteLaunchProfile = useCallback(async (id: string) => {
+    const current = await readState();
     const next: ReadyUpState = {
       ...current,
       launchProfiles: (current.launchProfiles || []).filter((p) => p.id !== id),
       activeProfile: current.activeProfile === id ? null : current.activeProfile,
     };
-    writeState(next);
+    await writeState(next);
     setState(next);
   }, []);
 
-  const setActiveProfile = useCallback((id: string) => {
-    const current = readState();
+  const setActiveProfile = useCallback(async (id: string) => {
+    const current = await readState();
     const next: ReadyUpState = { ...current, activeProfile: id };
-    writeState(next);
+    await writeState(next);
     setState(next);
   }, []);
 
-  const setAchievements = useCallback((achievements: Achievement[]) => {
-    const current = readState();
+  const setAchievements = useCallback(async (achievements: Achievement[]) => {
+    const current = await readState();
     const next: ReadyUpState = { ...current, achievements };
-    writeState(next);
+    await writeState(next);
     setState(next);
   }, []);
 
-  const setSoundId = useCallback((soundId: SoundId) => {
-    const current = readState();
+  const setSoundId = useCallback(async (soundId: SoundId) => {
+    const current = await readState();
     const next: ReadyUpState = { ...current, soundId };
-    writeState(next);
+    await writeState(next);
     setState(next);
   }, []);
 
-  const saveServer = useCallback((server: CommunityServer) => {
-    const current = readState();
+  const saveServer = useCallback(async (server: CommunityServer) => {
+    const current = await readState();
     const existing = (current.servers || []).filter((s) => s.id !== server.id);
     const next: ReadyUpState = { ...current, servers: [...existing, server] };
-    writeState(next);
+    await writeState(next);
     setState(next);
   }, []);
 
-  const deleteServer = useCallback((id: string) => {
-    const current = readState();
+  const deleteServer = useCallback(async (id: string) => {
+    const current = await readState();
     const next: ReadyUpState = {
       ...current,
       servers: (current.servers || []).filter((s) => s.id !== id),
     };
-    writeState(next);
+    await writeState(next);
     setState(next);
   }, []);
 
-  const exportData = useCallback((): string => {
-    const current = readState();
+  const exportData = useCallback(async (): Promise<string> => {
+    const current = await readState();
     return JSON.stringify(current, null, 2);
   }, []);
 
-  const importData = useCallback((json: string) => {
+  const importData = useCallback(async (json: string) => {
     const parsed = JSON.parse(json) as ReadyUpState;
     const next: ReadyUpState = {
       ...DEFAULT_STATE,
@@ -289,16 +297,42 @@ export function useReadyUpState() {
       achievements: parsed.achievements ?? [],
       servers: parsed.servers ?? [],
     };
-    writeState(next);
+    await writeState(next);
     setState(next);
   }, []);
+
+  const setSidebarTab = useCallback(async (tab: "schedule" | "stats" | "tools" | "progress") => {
+    const next = { ...state, sidebarTab: tab };
+    await writeState(next);
+    setState(next);
+  }, [state]);
+
+  const setCalendarDate = useCallback(async (date: string | null) => {
+    const next = { ...state, calendarDate: date };
+    await writeState(next);
+    setState(next);
+  }, [state]);
+
+  const setDailyRules = useCallback(async (checked: string[]) => {
+    const today = todayISO();
+    const next = { ...state, dailyRules: { date: today, checked } };
+    await writeState(next);
+    setState(next);
+  }, [state]);
+
+  const setPracticeTimer = useCallback(async (timer: PracticeTimerState) => {
+    const next = { ...state, practiceTimer: timer };
+    await writeState(next);
+    setState(next);
+  }, [state]);
 
   return {
     state, loaded,
     commitToday, addSession, addMatch, deleteMatch,
-    setTeamRoster, toggleDarkMode, setOnboardingComplete,
+    setTeamRoster, setOnboardingComplete,
     saveRuleTemplate, deleteRuleTemplate, archiveOldSessions,
     setViewMode, saveLaunchProfile, deleteLaunchProfile, setActiveProfile,
     setAchievements, setSoundId, saveServer, deleteServer, exportData, importData,
+    setSidebarTab, setCalendarDate, setDailyRules, setPracticeTimer,
   };
 }

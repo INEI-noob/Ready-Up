@@ -1,8 +1,4 @@
 {
-  "events": [
-    { "date": "2026-01-08", "title": "Team Scrim", "time": "19:00", "priority": "High" },
-    { "date": "2026-01-15", "title": "Team Scrim", "time": "19:00", "priority": "High" },
-    { "date": "2026-01-22", "title": "Team Scrim", "time": "19:00", "priority": "High" },
-    { "date": "2026-01-29", "title": "Team Scrim", "time": "19:00", "priority": "High" }
-  ]
+  "_comment": "Add scrim events here. priority: High = shows in Upcoming, Normal = calendar only.",
+  "events": []
 }

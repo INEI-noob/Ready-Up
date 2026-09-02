@@ -58,11 +58,11 @@ function CompareRow({ label, thisWeek, lastWeek, decimals = 2, lower = false }: 
       <div className="flex items-center gap-4">
         <div className="text-right">
           <div className="text-[12px] font-bold text-ink">{thisWeek.toFixed(decimals)}</div>
-          <div className="font-mono text-[9px] text-inkDim">THIS WEEK</div>
+          <div className="font-mono text-[10px] text-inkDim">THIS WEEK</div>
         </div>
         <div className="text-right">
           <div className="text-[12px] font-bold text-inkDim">{lastWeek.toFixed(decimals)}</div>
-          <div className="font-mono text-[9px] text-inkDim">LAST WEEK</div>
+          <div className="font-mono text-[10px] text-inkDim">LAST WEEK</div>
         </div>
         <div className="w-14 text-right">
           <Delta value={delta} lower={lower} />
@@ -92,7 +92,7 @@ export function SessionCompare({ sessions }: { sessions: SessionEntry[] }) {
 
   if (sessions.length < 2) {
     return (
-      <div className="rounded-xl border border-white/40 bg-white/30 p-4 text-center text-[12px] text-inkDim/60">
+      <div className="rounded-xl border border-white/40 bg-white/30 p-4 text-center text-[12px] text-inkDim/80">
         Need at least 2 sessions to compare
       </div>
     );
@@ -100,7 +100,7 @@ export function SessionCompare({ sessions }: { sessions: SessionEntry[] }) {
 
   if (thisWeek.length === 0 && lastWeek.length === 0) {
     return (
-      <div className="rounded-xl border border-white/40 bg-white/30 p-4 text-center text-[12px] text-inkDim/60">
+      <div className="rounded-xl border border-white/40 bg-white/30 p-4 text-center text-[12px] text-inkDim/80">
         No sessions this week or last week
       </div>
     );
@@ -121,12 +121,12 @@ export function SessionCompare({ sessions }: { sessions: SessionEntry[] }) {
 
       {thisWeek.length > 1 && (
         <div className="flex gap-2">
-          <div className="flex-1 rounded-xl border border-white/40 bg-white/40 p-2">
-            <div className="mb-0.5 font-mono text-[8px] tracking-wider text-inkDim">K/D TREND</div>
+          <div className="flex-1 rounded-xl border border-white/10 bg-white/5 p-2">
+            <div className="mb-0.5 font-mono text-[9px] tracking-wider text-inkDim">K/D TREND</div>
             <Sparkline data={kdTrend} color="#FFB6D9" height={24} />
           </div>
-          <div className="flex-1 rounded-xl border border-white/40 bg-white/40 p-2">
-            <div className="mb-0.5 font-mono text-[8px] tracking-wider text-inkDim">ADR TREND</div>
+          <div className="flex-1 rounded-xl border border-white/10 bg-white/5 p-2">
+            <div className="mb-0.5 font-mono text-[9px] tracking-wider text-inkDim">ADR TREND</div>
             <Sparkline data={adrTrend} color="#A8D8EA" height={24} />
           </div>
         </div>
@@ -142,11 +142,11 @@ export function SessionCompare({ sessions }: { sessions: SessionEntry[] }) {
       <div className="flex gap-2">
         <div className="flex-1 rounded-xl border border-white/30 bg-white/30 p-2 text-center">
           <div className="text-[16px] font-bold text-ink">{thisWeek.length}</div>
-          <div className="font-mono text-[8px] tracking-wider text-inkDim">SESSIONS THIS WEEK</div>
+          <div className="font-mono text-[9px] tracking-wider text-inkDim">SESSIONS THIS WEEK</div>
         </div>
         <div className="flex-1 rounded-xl border border-white/30 bg-white/30 p-2 text-center">
           <div className="text-[16px] font-bold text-inkDim">{lastWeek.length}</div>
-          <div className="font-mono text-[8px] tracking-wider text-inkDim">SESSIONS LAST WEEK</div>
+          <div className="font-mono text-[9px] tracking-wider text-inkDim">SESSIONS LAST WEEK</div>
         </div>
       </div>
     </motion.div>

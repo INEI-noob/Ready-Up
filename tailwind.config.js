@@ -1,6 +1,5 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  darkMode: ["class"],
   content: ["./index.html", "./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
@@ -9,33 +8,20 @@ export default {
         mono: ["'JetBrains Mono'", "ui-monospace", "monospace"],
       },
       colors: {
-        blush: "#FFF0F5",
-        sky: "#E8F4FD",
-        cream: "#FFFAF0",
-        panel: "#FFFFFF",
-        panelSoft: "#FFF8FA",
-        panelBlue: "#F0F8FF",
-        border: "#F0D4E8",
-        borderBlue: "#D4E8F7",
-        pastelPink: "#FFB6D9",
-        pastelBlue: "#A8D8EA",
-        pastelLavender: "#D4A5FF",
-        pastelMint: "#B8E6C8",
+        pastelPink: "#FFB8D9",
+        pastelBlue: "#7EC8E3",
+        pastelLavender: "#C9A0DC",
+        pastelMint: "#A8E6CF",
         pastelPeach: "#FFD4B8",
         pastelYellow: "#FFF3B0",
         pink: "#FF8FC7",
         pinkDim: "#E8A0C8",
         cyan: "#A8D8EA",
-        ink: "#4A3B5C",
-        inkSoft: "#7B6B8A",
-        inkDim: "#A89BB8",
-        ok: "#B8E6C8",
-        okDark: "#6BC48D",
-      },
-      darkColors: {
         ink: "#E8DFF0",
         inkSoft: "#C0B0D0",
-        inkDim: "#8A7A9A",
+        inkDim: "#9A8AAA",
+        ok: "#A8E6CF",
+        okDark: "#6BC48D",
       },
       borderRadius: {
         xl2: "1.1rem",

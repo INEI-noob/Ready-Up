@@ -58,6 +58,14 @@ export type CommunityServer = {
   password?: string;
 };
 
+export type PracticeTimerState = {
+  phase: number;
+  remaining: number;
+  running: boolean;
+  customDurations: Record<string, number>;
+  lastTick: number | null;
+};
+
 export type ReadyUpState = {
   streak: number;
   lastDate: string | null;
@@ -66,7 +74,6 @@ export type ReadyUpState = {
   matches: MatchEntry[];
   ruleStats: Record<string, number>;
   teamRoster: string[];
-  darkMode: boolean;
   onboardingComplete: boolean;
   ruleTemplates: RuleTemplate[];
   archivedSessions: SessionEntry[];
@@ -76,4 +83,21 @@ export type ReadyUpState = {
   achievements: Achievement[];
   soundId: SoundId;
   servers: CommunityServer[];
+  sidebarTab: "schedule" | "stats" | "tools" | "progress";
+  calendarDate: string | null;
+  dailyRules: { date: string; checked: string[] };
+  practiceTimer: PracticeTimerState;
 };
+
+export interface ReadyUpAPI {
+  getState: () => Promise<ReadyUpState>;
+  setState: (data: ReadyUpState) => Promise<boolean>;
+  launchSteam: () => Promise<{ ok: boolean; error?: string }>;
+  connectServer: (ip: string, port: number, password?: string) => Promise<{ ok: boolean; error?: string }>;
+}
+
+declare global {
+  interface Window {
+    api?: ReadyUpAPI;
+  }
+}

@@ -5,7 +5,7 @@ export function Sparkline({ data, color = "#FFB6D9", height = 32, width = 80 }: 
   width?: number;
 }) {
   if (data.length < 2) {
-    return <div style={{ width, height }} className="flex items-center justify-center text-[9px] text-inkDim/40">\u2014</div>;
+    return <div style={{ width, height }} className="flex items-center justify-center text-[10px] text-inkDim/60">—</div>;
   }
 
   const min = Math.min(...data);

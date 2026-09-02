@@ -33,10 +33,10 @@ function format_date(iso: string) {
 
 function StatCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
-    <div className="flex-1 rounded-xl border border-white/40 bg-white/40 p-2.5 text-center">
+    <div className="flex-1 rounded-xl border border-white/10 bg-white/5 p-2.5 text-center">
       <div className="font-display text-xl font-bold text-ink">{value}</div>
-      <div className="font-mono text-[9px] tracking-wider text-inkDim">{label}</div>
-      {sub && <div className="mt-0.5 text-[10px] text-inkDim/60">{sub}</div>}
+      <div className="font-mono text-[10px] tracking-wider text-inkDim">{label}</div>
+      {sub && <div className="mt-0.5 text-[10px] text-inkDim/80">{sub}</div>}
     </div>
   );
 }
@@ -60,7 +60,7 @@ function MatchRow({ match, showType = false, onDelete }: { match: MatchEntry; sh
     <motion.div
       initial={{ opacity: 0, x: -10 }}
       animate={{ opacity: 1, x: 0 }}
-      className="rounded-xl border border-white/40 bg-white/40 px-3 py-2.5"
+      className="rounded-xl border border-white/10 bg-white/5 px-3 py-2.5"
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -73,7 +73,7 @@ function MatchRow({ match, showType = false, onDelete }: { match: MatchEntry; sh
           </div>
         </div>
         <div className="text-right">
-          <div className="text-[13px] font-bold text-ink">{match.scoreFor}\u2013{match.scoreAgainst}</div>
+          <div className="text-[13px] font-bold text-ink">{match.scoreFor}–{match.scoreAgainst}</div>
           {showType && <div className={cn("font-mono text-[10px] font-bold uppercase", typeColor)}>{match.type}</div>}
         </div>
       </div>
@@ -83,9 +83,9 @@ function MatchRow({ match, showType = false, onDelete }: { match: MatchEntry; sh
         <span className="font-mono text-[10px] text-inkSoft">HS <strong className="text-ink">{match.hsPercent}%</strong></span>
       </div>
       {match.teamPlayers.length > 0 && (
-        <div className="mt-1 font-mono text-[9px] text-inkDim">{match.teamPlayers.join(", ")}</div>
+        <div className="mt-1 font-mono text-[10px] text-inkDim">{match.teamPlayers.join(", ")}</div>
       )}
-      {match.note && <div className="mt-1 text-[10px] text-inkDim/60">{match.note}</div>}
+      {match.note && <div className="mt-1 text-[10px] text-inkDim/80">{match.note}</div>}
       {onDelete && (
         <div className="mt-1.5 border-t border-white/30 pt-1.5">
           <button onClick={() => onDelete(match.id)} className="text-[10px] text-inkDim/40 hover:text-pink transition-colors">Delete</button>
@@ -101,19 +101,19 @@ function Overview({ state }: { state: ReadyUpState }) {
   const teamMatches = allMatches.filter((m) => m.type !== "personal");
   const personalMatches = allMatches.filter((m) => m.type === "personal");
 
-  const avgKd = sessions.length > 0 ? (sessions.reduce((s, e) => s + e.kd, 0) / sessions.length).toFixed(2) : "\u2014";
-  const avgAdr = sessions.length > 0 ? (sessions.reduce((s, e) => s + e.adr, 0) / sessions.length).toFixed(1) : "\u2014";
-  const avgHs = sessions.length > 0 ? (sessions.reduce((s, e) => s + e.hsPercent, 0) / sessions.length).toFixed(0) + "%" : "\u2014";
+  const avgKd = sessions.length > 0 ? (sessions.reduce((s, e) => s + e.kd, 0) / sessions.length).toFixed(2) : "—";
+  const avgAdr = sessions.length > 0 ? (sessions.reduce((s, e) => s + e.adr, 0) / sessions.length).toFixed(1) : "—";
+  const avgHs = sessions.length > 0 ? (sessions.reduce((s, e) => s + e.hsPercent, 0) / sessions.length).toFixed(0) + "%" : "—";
 
   const teamWins = teamMatches.filter((m) => m.result === "W").length;
   const teamLosses = teamMatches.filter((m) => m.result === "L").length;
   const teamDraws = teamMatches.filter((m) => m.result === "D").length;
-  const teamWinRate = teamMatches.length > 0 ? ((teamWins / teamMatches.length) * 100).toFixed(0) + "%" : "\u2014";
+  const teamWinRate = teamMatches.length > 0 ? ((teamWins / teamMatches.length) * 100).toFixed(0) + "%" : "—";
 
   const personalWins = personalMatches.filter((m) => m.result === "W").length;
   const personalLosses = personalMatches.filter((m) => m.result === "L").length;
   const personalDraws = personalMatches.filter((m) => m.result === "D").length;
-  const personalWinRate = personalMatches.length > 0 ? ((personalWins / personalMatches.length) * 100).toFixed(0) + "%" : "\u2014";
+  const personalWinRate = personalMatches.length > 0 ? ((personalWins / personalMatches.length) * 100).toFixed(0) + "%" : "—";
 
   const maxStreak = (() => {
     let max = state.streak;
@@ -177,19 +177,19 @@ function Overview({ state }: { state: ReadyUpState }) {
 
       {sessions.length >= 2 && (
         <div className="flex gap-2">
-          <div className="flex-1 rounded-xl border border-white/40 bg-white/40 p-2.5">
-            <div className="mb-1 font-mono text-[9px] tracking-wider text-inkDim">K/D TREND</div>
+          <div className="flex-1 rounded-xl border border-white/10 bg-white/5 p-2.5">
+            <div className="mb-1 font-mono text-[10px] tracking-wider text-inkDim">K/D TREND</div>
             <Sparkline data={kdTrend} color="#FFB6D9" />
           </div>
-          <div className="flex-1 rounded-xl border border-white/40 bg-white/40 p-2.5">
-            <div className="mb-1 font-mono text-[9px] tracking-wider text-inkDim">ADR TREND</div>
+          <div className="flex-1 rounded-xl border border-white/10 bg-white/5 p-2.5">
+            <div className="mb-1 font-mono text-[10px] tracking-wider text-inkDim">ADR TREND</div>
             <Sparkline data={adrTrend} color="#A8D8EA" />
           </div>
         </div>
       )}
 
       {teamMatches.length > 0 && (
-        <div className="rounded-xl border border-white/40 bg-white/40 p-3">
+        <div className="rounded-xl border border-white/10 bg-white/5 p-3">
           <div className="mb-2 font-mono text-[10px] tracking-wider text-inkDim">TEAM RECORD</div>
           <div className="flex items-center gap-3">
             <div className="flex gap-2">
@@ -199,7 +199,7 @@ function Overview({ state }: { state: ReadyUpState }) {
             </div>
             <div className="ml-auto text-right">
               <div className="text-sm font-bold text-ink">{teamWinRate}</div>
-              <div className="font-mono text-[9px] text-inkDim">WIN RATE</div>
+              <div className="font-mono text-[10px] text-inkDim">WIN RATE</div>
             </div>
           </div>
         </div>
@@ -216,14 +216,14 @@ function Overview({ state }: { state: ReadyUpState }) {
             </div>
             <div className="ml-auto text-right">
               <div className="text-sm font-bold text-ink">{personalWinRate}</div>
-              <div className="font-mono text-[9px] text-inkDim">WIN RATE</div>
+              <div className="font-mono text-[10px] text-inkDim">WIN RATE</div>
             </div>
           </div>
         </div>
       )}
 
       {mapStats.length > 0 && (
-        <div className="rounded-xl border border-white/40 bg-white/40 p-3">
+        <div className="rounded-xl border border-white/10 bg-white/5 p-3">
           <div className="mb-2 font-mono text-[10px] tracking-wider text-inkDim">MAP WIN RATES</div>
           <div className="space-y-1.5">
             {mapStats.map(({ map, wins, losses, total, winRate }) => (
@@ -244,7 +244,7 @@ function Overview({ state }: { state: ReadyUpState }) {
       )}
 
       {dayStats.length > 0 && (
-        <div className="rounded-xl border border-white/40 bg-white/40 p-3">
+        <div className="rounded-xl border border-white/10 bg-white/5 p-3">
           <div className="mb-2 font-mono text-[10px] tracking-wider text-inkDim">BEST DAYS</div>
           <div className="space-y-1">
             {dayStats.map(({ day, avgKd, avgAdr, count }) => (
@@ -252,7 +252,7 @@ function Overview({ state }: { state: ReadyUpState }) {
                 <span className="text-[12px] font-bold text-ink">{day.slice(0, 3)}</span>
                 <span className="font-mono text-[10px] text-inkDim">
                   K/D <strong className="text-ink">{avgKd.toFixed(2)}</strong> &middot; ADR <strong className="text-ink">{avgAdr.toFixed(1)}</strong>
-                  <span className="ml-1 text-inkDim/50">({count})</span>
+                  <span className="ml-1 text-inkDim/70">({count})</span>
                 </span>
               </div>
             ))}
@@ -261,7 +261,7 @@ function Overview({ state }: { state: ReadyUpState }) {
       )}
 
       {sortedRules.length > 0 && (
-        <div className="rounded-xl border border-white/40 bg-white/40 p-3">
+        <div className="rounded-xl border border-white/10 bg-white/5 p-3">
           <div className="mb-2 font-mono text-[10px] tracking-wider text-inkDim">RULES CHECKED</div>
           <div className="space-y-1">
             {sortedRules.map(([key, count]) => (
@@ -283,14 +283,32 @@ function Sessions({ state, onAddSession }: { state: ReadyUpState; onAddSession: 
 
   return (
     <div>
-      <div className="mb-3 flex gap-1 rounded-xl border border-white/30 bg-white/40 p-0.5">
+      <div
+        role="tablist"
+        className="mb-3 flex gap-1 rounded-xl border border-white/10 bg-white/5 p-0.5"
+        onKeyDown={(e) => {
+          if (e.key === "ArrowRight") {
+            e.preventDefault();
+            setView("compare");
+          } else if (e.key === "ArrowLeft") {
+            e.preventDefault();
+            setView("log");
+          }
+        }}
+      >
         <button
+          role="tab"
+          aria-selected={view === "log"}
+          tabIndex={view === "log" ? 0 : -1}
           onClick={() => setView("log")}
           className={cn("flex-1 rounded-lg py-1 text-[11px] font-bold transition-all", view === "log" ? "bg-gradient-to-r from-pastelBlue/20 to-pastelLavender/20 text-ink shadow-sm" : "text-inkDim hover:text-ink")}
         >
           Log
         </button>
         <button
+          role="tab"
+          aria-selected={view === "compare"}
+          tabIndex={view === "compare" ? 0 : -1}
           onClick={() => setView("compare")}
           className={cn("flex flex-1 items-center justify-center gap-1 rounded-lg py-1 text-[11px] font-bold transition-all", view === "compare" ? "bg-gradient-to-r from-pastelBlue/20 to-pastelLavender/20 text-ink shadow-sm" : "text-inkDim hover:text-ink")}
         >
@@ -304,7 +322,7 @@ function Sessions({ state, onAddSession }: { state: ReadyUpState; onAddSession: 
         <>
           <div className="mb-2 flex items-center justify-between">
             <span className="font-mono text-[10px] tracking-wider text-inkDim">SESSION LOG</span>
-            <button onClick={onAddSession} className="flex items-center gap-1 rounded-full border border-pastelPink/20 px-2 py-0.5 text-[10px] font-bold text-pastelPink transition-colors hover:bg-pastelPink/10">
+            <button onClick={onAddSession} className="flex items-center gap-1 rounded-xl border border-pastelPink/20 px-3 py-1.5 text-[12px] font-bold text-pastelPink transition-colors hover:bg-pastelPink/10">
               <Plus className="h-3 w-3" /> ADD
             </button>
           </div>
@@ -322,12 +340,12 @@ function Sessions({ state, onAddSession }: { state: ReadyUpState; onAddSession: 
                     <span className="font-mono text-[11px] text-inkSoft">HS <strong className="text-ink">{s.hsPercent}%</strong></span>
                   </div>
                   {s.mindsetNote && <div className="mt-1 font-mono text-[10px] text-pastelPink/60">{s.mindsetNote}</div>}
-                  {s.note && <div className="mt-1 text-[11px] text-inkDim/60">{s.note}</div>}
+                  {s.note && <div className="mt-1 text-[11px] text-inkDim/80">{s.note}</div>}
                 </div>
               ))}
             </div>
           ) : (
-            <div className="rounded-xl border border-white/40 bg-white/30 p-4 text-center text-[12px] text-inkDim/60">No sessions logged yet</div>
+            <div className="rounded-xl border border-white/40 bg-white/30 p-4 text-center text-[12px] text-inkDim/80">No sessions logged yet</div>
           )}
         </>
       )}
@@ -343,7 +361,7 @@ function TeamMatches({ state, onAddMatch, onDeleteMatch }: { state: ReadyUpState
     <div>
       <div className="mb-2 flex items-center justify-between">
         <span className="font-mono text-[10px] tracking-wider text-inkDim">SCRIMS & OFFICIALS</span>
-        <button onClick={onAddMatch} className="flex items-center gap-1 rounded-full border border-pastelPink/20 px-2 py-0.5 text-[10px] font-bold text-pastelPink transition-colors hover:bg-pastelPink/10">
+        <button onClick={onAddMatch} className="flex items-center gap-1 rounded-xl border border-pastelPink/20 px-3 py-1.5 text-[12px] font-bold text-pastelPink transition-colors hover:bg-pastelPink/10">
           <Plus className="h-3 w-3" /> ADD
         </button>
       </div>
@@ -351,7 +369,7 @@ function TeamMatches({ state, onAddMatch, onDeleteMatch }: { state: ReadyUpState
       {filtered.length > 0 ? (
         <div className="space-y-1.5">{filtered.map((m) => <MatchRow key={m.id} match={m} showType onDelete={onDeleteMatch} />)}</div>
       ) : (
-        <div className="rounded-xl border border-white/40 bg-white/30 p-4 text-center text-[12px] text-inkDim/60">
+        <div className="rounded-xl border border-white/40 bg-white/30 p-4 text-center text-[12px] text-inkDim/80">
           {activeCount > 0 ? "No matches match your filters" : "No team matches logged yet"}
         </div>
       )}
@@ -367,7 +385,7 @@ function PersonalMatches({ state, onAddMatch, onDeleteMatch }: { state: ReadyUpS
     <div>
       <div className="mb-2 flex items-center justify-between">
         <span className="font-mono text-[10px] tracking-wider text-inkDim">PERSONAL GAMES</span>
-        <button onClick={onAddMatch} className="flex items-center gap-1 rounded-full border border-pastelPink/20 px-2 py-0.5 text-[10px] font-bold text-pastelPink transition-colors hover:bg-pastelPink/10">
+        <button onClick={onAddMatch} className="flex items-center gap-1 rounded-xl border border-pastelPink/20 px-3 py-1.5 text-[12px] font-bold text-pastelPink transition-colors hover:bg-pastelPink/10">
           <Plus className="h-3 w-3" /> ADD
         </button>
       </div>
@@ -375,7 +393,7 @@ function PersonalMatches({ state, onAddMatch, onDeleteMatch }: { state: ReadyUpS
       {filtered.length > 0 ? (
         <div className="space-y-1.5">{filtered.map((m) => <MatchRow key={m.id} match={m} onDelete={onDeleteMatch} />)}</div>
       ) : (
-        <div className="rounded-xl border border-white/40 bg-white/30 p-4 text-center text-[12px] text-inkDim/60">
+        <div className="rounded-xl border border-white/40 bg-white/30 p-4 text-center text-[12px] text-inkDim/80">
           {activeCount > 0 ? "No matches match your filters" : "No personal games logged yet"}
         </div>
       )}
@@ -399,13 +417,34 @@ export function Stats({ state, onAddSession, onAddMatch, onDeleteMatch, onOpenRo
 
   return (
     <div>
-      <div className="mb-4 flex gap-1 rounded-xl border border-white/30 bg-white/40 p-1">
+      <div
+        role="tablist"
+        className="mb-4 flex gap-1 rounded-xl border border-white/10 bg-white/5 p-1"
+        onKeyDown={(e) => {
+          const keys = TABS.map((t) => t.key);
+          const idx = keys.indexOf(tab);
+          if (e.key === "ArrowRight") {
+            e.preventDefault();
+            setTab(keys[(idx + 1) % keys.length]);
+          } else if (e.key === "ArrowLeft") {
+            e.preventDefault();
+            setTab(keys[(idx - 1 + keys.length) % keys.length]);
+          }
+        }}
+      >
         {TABS.map(({ key, label, icon: Icon }) => (
-          <button key={key} onClick={() => setTab(key)} className={cn(
-            "flex flex-1 items-center justify-center gap-1.5 rounded-lg py-1.5 text-[11px] font-bold transition-all",
-            tab === key ? "bg-gradient-to-r from-pastelPink/20 to-pastelLavender/20 text-ink shadow-sm" : "text-inkDim hover:text-ink"
-          )}>
-            <Icon className="h-3 w-3" />{label}
+          <button
+            key={key}
+            role="tab"
+            aria-selected={tab === key}
+            tabIndex={tab === key ? 0 : -1}
+            onClick={() => setTab(key)}
+            className={cn(
+              "flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2 text-[11px] font-bold transition-all",
+              tab === key ? "bg-gradient-to-r from-pastelPink/20 to-pastelLavender/20 text-ink shadow-sm" : "text-inkDim hover:text-ink"
+            )}
+          >
+            <Icon className="h-3.5 w-3.5" />{label}
           </button>
         ))}
       </div>
@@ -420,7 +459,7 @@ export function Stats({ state, onAddSession, onAddMatch, onDeleteMatch, onOpenRo
       </AnimatePresence>
 
       {/* Rule templates */}
-      <div className="mt-4 border-t border-white/30 pt-3">
+      <div className="mt-4 border-t border-pastelPink/15 pt-3">
         <RuleTemplates
           templates={state.ruleTemplates || []}
           onSave={onSaveTemplate}
@@ -431,14 +470,14 @@ export function Stats({ state, onAddSession, onAddMatch, onDeleteMatch, onOpenRo
       </div>
 
       {/* Bottom actions */}
-      <div className="mt-3 flex gap-2 border-t border-white/30 pt-3">
-        <button onClick={onOpenRoster} className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-white/40 bg-white/40 py-2 text-[11px] font-bold text-inkDim transition-all hover:border-pastelLavender/30 hover:text-ink">
+      <div className="mt-4 flex gap-2 border-t border-pastelPink/15 pt-3">
+        <button onClick={onOpenRoster} className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/5 py-2.5 text-[12px] font-bold text-inkDim transition-all hover:border-pastelLavender/30 hover:text-ink">
           <Users className="h-3 w-3" /> Roster
         </button>
-        <button onClick={onExport} className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-white/40 bg-white/40 py-2 text-[11px] font-bold text-inkDim transition-all hover:border-pastelBlue/30 hover:text-ink">
+        <button onClick={onExport} className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/5 py-2.5 text-[12px] font-bold text-inkDim transition-all hover:border-pastelBlue/30 hover:text-ink">
           <Download className="h-3 w-3" /> Export
         </button>
-        <button onClick={onImport} className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-white/40 bg-white/40 py-2 text-[11px] font-bold text-inkDim transition-all hover:border-pastelPink/30 hover:text-ink">
+        <button onClick={onImport} className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/5 py-2.5 text-[12px] font-bold text-inkDim transition-all hover:border-pastelPink/30 hover:text-ink">
           <Upload className="h-3 w-3" /> Import
         </button>
       </div>

@@ -54,11 +54,12 @@ export function SoundCustomization({ soundId, onChange }: {
           <button
             key={s.id}
             onClick={() => { onChange(s.id); playPreview(s.id); }}
+            aria-pressed={soundId === s.id}
             className={cn(
               "flex-1 rounded-xl border px-2 py-1.5 text-[11px] font-bold transition-all",
               soundId === s.id
                 ? "border-pastelBlue/30 bg-pastelBlue/15 text-pastelBlue"
-                : "border-white/40 bg-white/40 text-inkDim hover:text-ink"
+                : "border-white/10 bg-white/5 text-inkDim hover:text-ink"
             )}
           >
             {s.label}

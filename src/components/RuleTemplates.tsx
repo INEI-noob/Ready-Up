@@ -36,7 +36,7 @@ export function RuleTemplates({
         </div>
         <button
           onClick={() => setShowSave(!showSave)}
-          className="flex items-center gap-1 rounded-full border border-pastelPink/20 px-2 py-0.5 text-[10px] font-bold text-pastelPink transition-colors hover:bg-pastelPink/10"
+          className="flex items-center gap-1 rounded-xl border border-pastelPink/20 px-3 py-1.5 text-[12px] font-bold text-pastelPink transition-colors hover:bg-pastelPink/10"
         >
           <Plus className="h-3 w-3" /> Save current
         </button>
@@ -58,17 +58,17 @@ export function RuleTemplates({
                 onChange={(e) => setTemplateName(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSave()}
                 placeholder="Template name..."
-                className="flex-1 rounded-lg border border-white/40 bg-white/50 px-2.5 py-1 text-[12px] text-ink outline-none placeholder:text-inkDim/40 focus:border-pastelPink/40"
+                className="flex-1 rounded-xl border border-white/10 bg-[rgba(25,22,40,0.5)] px-3 py-1.5 text-[13px] text-ink outline-none placeholder:text-pastelPink/40 focus:border-pastelPink/40 focus:ring-2 focus:ring-pastelPink/20"
               />
               <button
                 onClick={handleSave}
                 disabled={!templateName.trim()}
-                className="flex items-center gap-1 rounded-lg bg-gradient-to-r from-pastelPink to-pastelLavender px-3 py-1 text-[11px] font-bold text-white transition-all hover:-translate-y-0.5 disabled:opacity-40"
+                className="flex items-center gap-1 rounded-xl bg-gradient-to-r from-pastelPink to-pastelLavender px-3 py-1.5 text-[12px] font-bold text-white transition-all hover:-translate-y-0.5 disabled:opacity-40"
               >
                 <Check className="h-3 w-3" /> Save
               </button>
             </div>
-            <div className="mt-1 text-[10px] text-inkDim/50">
+            <div className="mt-1 text-[10px] text-inkDim/70">
               Saves {currentChecked.size}/{RULES.length} checked rules
             </div>
           </motion.div>
@@ -81,23 +81,23 @@ export function RuleTemplates({
           {templates.map((t) => (
             <div
               key={t.name}
-              className="flex items-center gap-2 rounded-xl border border-white/40 bg-white/40 px-3 py-2"
+              className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2"
             >
               <div className="flex-1 min-w-0">
                 <div className="text-[12px] font-bold text-ink">{t.name}</div>
-                <div className="font-mono text-[9px] text-inkDim">
+                <div className="font-mono text-[10px] text-inkDim">
                   {t.rules.map((r) => r.charAt(0).toUpperCase() + r.slice(1)).join(", ")}
                 </div>
               </div>
               <button
                 onClick={() => onLoad(t.rules)}
-                className="shrink-0 rounded-lg border border-pastelPink/20 px-2 py-1 text-[10px] font-bold text-pastelPink transition-colors hover:bg-pastelPink/10"
+                className="shrink-0 rounded-xl border border-pastelPink/20 px-3 py-1.5 text-[12px] font-bold text-pastelPink transition-colors hover:bg-pastelPink/10"
               >
                 Load
               </button>
               <button
                 onClick={() => onDelete(t.name)}
-                className="shrink-0 rounded-lg border border-white/40 px-1.5 py-1 text-inkDim/40 transition-colors hover:border-pink/30 hover:text-pink"
+                className="shrink-0 rounded-xl border border-white/10 px-1.5 py-1 text-inkDim/40 transition-colors hover:border-pink/30 hover:text-pink"
               >
                 <Trash2 className="h-3 w-3" />
               </button>
@@ -105,7 +105,7 @@ export function RuleTemplates({
           ))}
         </div>
       ) : (
-        <div className="rounded-xl border border-white/30 bg-white/20 p-3 text-center text-[11px] text-inkDim/50">
+        <div className="rounded-xl border border-white/10 bg-white/5 p-3 text-center text-[11px] text-inkDim/70">
           No templates saved yet
         </div>
       )}

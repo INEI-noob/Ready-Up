@@ -23,7 +23,7 @@ export function Mascot({ checkedCount }: { checkedCount: number }) {
   const isLocked = checkedCount === 4;
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-start gap-3 overflow-visible">
       <div className="relative">
         {/* Idle bobbing animation */}
         <motion.div
@@ -51,16 +51,18 @@ export function Mascot({ checkedCount }: { checkedCount: number }) {
             initial={{ scale: 1 }}
             animate={{ scale: [1, 1.15, 1], rotate: [0, -3, 0] }}
             transition={{ duration: 0.4, ease: "easeOut" }}
+            role="img"
+            aria-label={state.caption}
           >
             <defs>
               <linearGradient id="mascotGradient" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stopColor="#FFB6D9" />
-                <stop offset="0.5" stopColor="#D4A5FF" />
-                <stop offset="1" stopColor="#A8D8EA" />
+                <stop offset="0" stopColor="#FFB8D9" />
+                <stop offset="0.5" stopColor="#C9A0DC" />
+                <stop offset="1" stopColor="#7EC8E3" />
               </linearGradient>
             </defs>
             {/* Body */}
-            <ellipse cx="50" cy="58" rx="34" ry="30" fill="#FFB6D9" />
+            <ellipse cx="50" cy="58" rx="34" ry="30" fill="#FFB8D9" />
             <ellipse cx="50" cy="58" rx="34" ry="30" fill="url(#mascotGradient)" opacity="0.6" />
             {/* Ears */}
             <motion.ellipse
@@ -89,25 +91,25 @@ export function Mascot({ checkedCount }: { checkedCount: number }) {
               <>
                 <motion.circle
                   cx="40" cy="52" r="0.6" fill="#fff"
+                  initial={{ opacity: 0, scale: 0.5 }}
                   animate={{ opacity: [0, 1, 0], scale: [0.5, 1.2, 0.5] }}
                   transition={{ duration: 1.5, repeat: Infinity, delay: 0.5 }}
                 />
                 <motion.circle
                   cx="64" cy="52" r="0.6" fill="#fff"
+                  initial={{ opacity: 0, scale: 0.5 }}
                   animate={{ opacity: [0, 1, 0], scale: [0.5, 1.2, 0.5] }}
                   transition={{ duration: 1.5, repeat: Infinity, delay: 0.8 }}
                 />
               </>
             )}
             {/* Mouth */}
-            <motion.path
+            <path
               d={state.mouth}
               stroke="#4A3B5C"
               strokeWidth={2.5}
               fill="none"
               strokeLinecap="round"
-              animate={{ d: state.mouth }}
-              transition={{ duration: 0.25 }}
             />
             {/* Blush */}
             <motion.circle

@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Flame, Sparkles, Calendar, Moon, Sun, PenLine, Minimize2, Maximize2, CalendarDays, BarChart3, Wrench, Trophy } from "lucide-react";
+import { Flame, Sparkles, Calendar, PenLine, Minimize2, Maximize2, CalendarDays, BarChart3, Wrench, Trophy } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Mascot } from "@/components/Mascot";
@@ -14,7 +14,8 @@ import { RosterManager } from "@/components/RosterManager";
 import { Onboarding } from "@/components/Onboarding";
 import { MiniDashboard } from "@/components/MiniDashboard";
 import { LaunchProfiles } from "@/components/LaunchProfiles";
-import { Achievements, getNewAchievements, mergeAchievements, ACHIEVEMENT_DEFS } from "@/components/Achievements";
+import { Achievements, checkAndUnlockAchievements, ACHIEVEMENT_DEFS } from "@/components/Achievements";
+import { KeyboardHelp } from "@/components/KeyboardHelp";
 import { SoundCustomization } from "@/components/SoundCustomization";
 import { PracticeTimer } from "@/components/PracticeTimer";
 import { MatchStreak } from "@/components/MatchStreak";
@@ -61,14 +62,6 @@ function playSound(soundId: SoundId) {
   } catch { /* silent fail */ }
 }
 
-function getTimeOfDay(): "morning" | "afternoon" | "evening" | "night" {
-  const h = new Date().getHours();
-  if (h >= 5 && h < 12) return "morning";
-  if (h >= 12 && h < 17) return "afternoon";
-  if (h >= 17 && h < 21) return "evening";
-  return "night";
-}
-
 function FloatingDecorations() {
   return (
     <div className="pointer-events-none fixed inset-0 overflow-hidden">
@@ -96,7 +89,7 @@ function ProgressRing({ checked, total }: { checked: number; total: number }) {
     <div className="relative h-12 w-12">
       <svg className="h-12 w-12 -rotate-90" viewBox="0 0 44 44">
         <circle cx="22" cy="22" r="20" fill="none" stroke="rgba(255,182,217,0.15)" strokeWidth="3" />
-        <motion.circle cx="22" cy="22" r="20" fill="none" stroke="url(#progressGradient)" strokeWidth="3" strokeLinecap="round" strokeDasharray={circumference} animate={{ strokeDashoffset: offset }} transition={{ duration: 0.5, ease: "easeOut" }} />
+        <motion.circle cx="22" cy="22" r="20" fill="none" stroke="url(#progressGradient)" strokeWidth="3" strokeLinecap="round" strokeDasharray={circumference} initial={{ strokeDashoffset: circumference }} animate={{ strokeDashoffset: offset }} transition={{ duration: 0.5, ease: "easeOut" }} />
         <defs><linearGradient id="progressGradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#FFB6D9" /><stop offset="1" stopColor="#D4A5FF" /></linearGradient></defs>
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">
@@ -112,7 +105,7 @@ function ReadyUpApp() {
   const focus = ROUTINE[dayName] ?? FALLBACK_FOCUS;
   const dateLabel = useMemo(() => `${dayName.toUpperCase()} \u00B7 ${now.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`, [dayName, now]);
 
-  const { state, commitToday, addSession, addMatch, deleteMatch, setTeamRoster, toggleDarkMode, setOnboardingComplete, saveRuleTemplate, deleteRuleTemplate, archiveOldSessions, setViewMode, saveLaunchProfile, deleteLaunchProfile, setActiveProfile, setAchievements, setSoundId, saveServer, deleteServer, exportData, importData } = useReadyUpState();
+  const { state, loaded, commitToday, addSession, addMatch, deleteMatch, setTeamRoster, setOnboardingComplete, saveRuleTemplate, deleteRuleTemplate, archiveOldSessions, setViewMode, saveLaunchProfile, deleteLaunchProfile, setActiveProfile, setAchievements, setSoundId, saveServer, deleteServer, exportData, importData, setSidebarTab, setCalendarDate, setDailyRules, setPracticeTimer } = useReadyUpState();
   const [checked, setChecked] = useState<Set<string>>(new Set());
   const [launching, setLaunching] = useState(false);
   const [confetti, setConfetti] = useState(false);
@@ -123,29 +116,33 @@ function ReadyUpApp() {
   const [showRoster, setShowRoster] = useState(false);
   const [mindsetNote, setMindsetNote] = useState("");
   const [showMindset, setShowMindset] = useState(false);
-  const [sidebarTab, setSidebarTab] = useState<"schedule" | "stats" | "tools" | "progress">("schedule");
   const rulesRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const todayISO = useMemo(() => new Date().toISOString().slice(0, 10), []);
+
+  // Load persisted daily rules for today
+  useEffect(() => {
+    if (loaded && state.dailyRules?.date === todayISO) {
+      setChecked(new Set(state.dailyRules.checked));
+    }
+  }, [loaded]);
+
+  // Persist daily rules when checked changes (debounced)
+  const persistTimer = useRef<ReturnType<typeof setTimeout>>();
+  useEffect(() => {
+    if (!loaded) return;
+    clearTimeout(persistTimer.current);
+    persistTimer.current = setTimeout(() => {
+      setDailyRules([...checked]);
+    }, 500);
+    return () => clearTimeout(persistTimer.current);
+  }, [checked, loaded]);
 
   const allChecked = checked.size === RULES.length;
-  const isDark = state.darkMode;
-  const loaded = state.onboardingComplete !== undefined;
   const showOnboarding = loaded && !state.onboardingComplete;
+  const sidebarTab = state.sidebarTab;
 
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", isDark);
-  }, [isDark]);
-
-  useEffect(() => {
-    const tod = getTimeOfDay();
-    document.body.classList.remove("time-morning", "time-afternoon", "time-evening", "time-night");
-    if (!isDark) {
-      document.body.classList.add(`time-${tod}`);
-    } else {
-      document.body.style.background = "";
-    }
-  }, [isDark]);
-
+  // Auto-archive old sessions on load
   const didArchive = useRef(false);
   useEffect(() => {
     if (loaded && !didArchive.current) {
@@ -154,6 +151,7 @@ function ReadyUpApp() {
     }
   }, [loaded]);
 
+  // Play chime when all rules checked
   const prevAllChecked = useRef(false);
   useEffect(() => {
     if (allChecked && !prevAllChecked.current) {
@@ -163,21 +161,21 @@ function ReadyUpApp() {
     prevAllChecked.current = allChecked;
   }, [allChecked, state.soundId]);
 
+  // Check achievements on state change
   useEffect(() => {
     if (!loaded) return;
-    const newAchievements = getNewAchievements(state);
+    const newAchievements = checkAndUnlockAchievements(state, setAchievements);
     if (newAchievements.length > 0) {
-      const merged = mergeAchievements(state.achievements || [], newAchievements);
-      setAchievements(merged);
       for (const a of newAchievements) {
         const def = ACHIEVEMENT_DEFS.find((d) => d.id === a.id);
         if (def) {
-          toast(`${def.icon} ${def.name} unlocked!`, "success");
+          toast(`${def.name} unlocked!`, "success");
         }
       }
     }
-  }, [loaded, state.sessions, state.matches, state.streak, state.teamRoster, state.darkMode]);
+  }, [loaded, state.sessions, state.matches, state.streak, state.teamRoster]);
 
+  // Keyboard shortcuts
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       const active = document.activeElement;
@@ -220,9 +218,18 @@ function ReadyUpApp() {
 
     await commitToday(dayName, [...checked]);
 
-    setTimeout(() => {
-      window.location.href = "steam://rungameid/730";
-      toast("Launched CS2!", "success");
+    setTimeout(async () => {
+      if (window.api) {
+        const result = await window.api.launchSteam();
+        if (result.ok) {
+          toast("Launched CS2!", "success");
+        } else {
+          toast("Couldn't reach Steam", "error");
+        }
+      } else {
+        window.location.href = "steam://rungameid/730";
+        toast("Launched CS2!", "success");
+      }
       setLaunching(false);
       setShowAddSession(true);
     }, 500);
@@ -259,18 +266,16 @@ function ReadyUpApp() {
   }
 
   return (
-    <div className={cn(
-      "flex min-h-screen items-start justify-center px-4 py-8 transition-colors duration-300 md:items-center",
-      isDark ? "bg-[#1a1525]" : ""
-    )}>
+    <div className="flex min-h-screen items-start justify-center px-4 py-8 transition-colors duration-300 md:items-center">
       <FloatingDecorations />
       <Confetti active={confetti} />
+      <KeyboardHelp />
 
       <div className="grid w-full max-w-[1200px] grid-cols-1 gap-6 lg:grid-cols-3 lg:items-start">
 
         {/* Left column — Launcher */}
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4 }} className="hidden flex-col gap-4 lg:flex">
-          <div className="rounded-3xl border border-pastelPink/20 bg-white/70 p-4 shadow-pastel backdrop-blur-sm">
+          <div className="rounded-3xl border border-pastelPink/20 bg-[rgba(25,22,40,0.75)] p-4 shadow-pastel backdrop-blur-sm">
             <div className="mb-3 flex items-center gap-1.5">
               <Sparkles className="h-3 w-3 text-pastelPink" />
               <span className="font-mono text-[10px] tracking-wider text-inkDim">LAUNCHER</span>
@@ -278,22 +283,31 @@ function ReadyUpApp() {
             <Button
               variant="idle"
               size="lg"
-              onClick={() => {
-                window.location.href = "steam://rungameid/730";
-                toast("Launched CS2!", "success");
+              onClick={async () => {
+                if (window.api) {
+                  const result = await window.api.launchSteam();
+                  if (result.ok) toast("Launched CS2!", "success");
+                  else toast("Couldn't reach Steam", "error");
+                } else {
+                  window.location.href = "steam://rungameid/730";
+                  toast("Launched CS2!", "success");
+                }
               }}
             >
               <span className="flex items-center gap-2">LAUNCH GAME</span>
             </Button>
           </div>
-          <div className="rounded-3xl border border-pastelPink/20 bg-white/70 p-4 shadow-pastel backdrop-blur-sm">
+          <div className="rounded-3xl border border-pastelPink/20 bg-[rgba(25,22,40,0.75)] p-4 shadow-pastel backdrop-blur-sm">
             <CommunityServers
               servers={state.servers || []}
               onSave={(s) => { saveServer(s); toast("Server saved", "success"); }}
               onDelete={(id) => { deleteServer(id); toast("Server removed", "info"); }}
               onConnect={async (ip, port, password) => {
-                window.location.href = `steam://connect/${ip}:${port}${password ? `/${password}` : ""}`;
-                toast("Connecting to server...", "success");
+                if (window.api) {
+                  const result = await window.api.connectServer(ip, port, password);
+                  if (result.ok) toast("Connecting to server...", "success");
+                  else toast("Could not connect", "error");
+                }
               }}
             />
           </div>
@@ -310,10 +324,6 @@ function ReadyUpApp() {
                   {state.viewMode === "mini" ? <Maximize2 className="h-4 w-4" /> : <Minimize2 className="h-4 w-4" />}
                 </motion.button>
 
-                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={toggleDarkMode} className={cn("flex h-10 w-10 items-center justify-center rounded-full border transition-all duration-300", isDark ? "border-pastelLavender/30 bg-pastelLavender/10 text-pastelLavender" : "border-white/40 bg-white/50 text-inkDim hover:border-pastelPink/30 hover:text-pastelPink")}>
-                  {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-                </motion.button>
-
                 <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setShowCalendar(!showCalendar)} className={cn("flex h-10 w-10 items-center justify-center rounded-full border transition-all duration-300 lg:hidden", showCalendar ? "border-pastelPink bg-pastelPink/10 text-pastelPink shadow-pastel" : "border-white/40 bg-white/50 text-inkDim hover:border-pastelPink/30 hover:text-pastelPink")}>
                   <Calendar className="h-4 w-4" />
                 </motion.button>
@@ -324,7 +334,7 @@ function ReadyUpApp() {
                   </div>
                   <div>
                     <div className="text-lg font-extrabold leading-none text-ink">{state.streak}</div>
-                    <div className="font-mono text-[9px] tracking-wider text-inkDim">DAY STREAK</div>
+                    <div className="font-mono text-[10px] tracking-wider text-inkDim">DAY STREAK</div>
                   </div>
                 </motion.div>
               </div>
@@ -368,7 +378,7 @@ function ReadyUpApp() {
               <span className="font-mono text-[11.5px] tracking-wider text-inkDim">GOLDEN RULES</span>
               <ProgressRing checked={checked.size} total={RULES.length} />
             </div>
-            <div className="mb-2 ml-1 font-mono text-[10.5px] text-inkDim/60">tap each one to lock it in &middot; press 1-4 or spacebar</div>
+            <div className="mb-2 ml-1 font-mono text-[10.5px] text-inkDim/80">tap each one to lock it in &middot; press 1-4 or spacebar</div>
             <div className="mt-2">
               {RULES.map((rule, i) => (
                 <RuleCard key={rule.key} rule={rule} checked={checked.has(rule.key)} onToggle={() => toggleRule(rule.key)} index={i} isLast={i === RULES.length - 1} />
@@ -384,7 +394,7 @@ function ReadyUpApp() {
                 initial={{ opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 4 }}
-                className="mb-3 min-h-[16px] text-center font-mono text-[13px] text-inkDim"
+                className="mb-3 min-h-[16px] min-w-[200px] text-center font-mono text-[13px] text-inkDim"
               >
                 {allChecked ? "all rules locked in. go get 'em!" : `${checked.size} / ${RULES.length} rules locked in`}
               </motion.div>
@@ -399,13 +409,13 @@ function ReadyUpApp() {
                   exit={{ opacity: 0, height: 0 }}
                   className="mb-3 overflow-hidden"
                 >
-                  <div className="rounded-2xl border border-pastelPink/15 bg-pastelPink/5 p-3">
+                  <div className="rounded-3xl border border-pastelPink/15 bg-pastelPink/5 p-3">
                     <div className="mb-1.5 flex items-center justify-between">
                       <div className="flex items-center gap-1.5">
                         <PenLine className="h-3 w-3 text-pastelPink" />
                         <span className="font-mono text-[10px] tracking-wider text-inkDim">PRE-GAME MINDSET</span>
                       </div>
-                      <button onClick={() => setShowMindset(!showMindset)} className="font-mono text-[10px] text-pastelPink hover:text-pink">
+                      <button onClick={() => setShowMindset(!showMindset)} className="rounded-lg p-1 font-mono text-[10px] text-pastelPink transition-colors duration-200 hover:text-pink active:scale-95">
                         {showMindset ? "hide" : "add note"}
                       </button>
                     </div>
@@ -417,7 +427,7 @@ function ReadyUpApp() {
                             onChange={(e) => setMindsetNote(e.target.value)}
                             rows={2}
                             placeholder="What's your mindset going in? e.g. stay calm, trade kills..."
-                            className="w-full resize-none rounded-xl border border-white/40 bg-white/50 px-3 py-2 text-[13px] text-ink outline-none placeholder:text-inkDim/40 focus:border-pastelPink/40"
+                            className="w-full resize-none rounded-xl border border-white/10 bg-[rgba(25,22,40,0.5)] px-3 py-1.5 text-[13px] text-ink outline-none placeholder:text-pastelPink/40 focus:border-pastelPink/40 focus:ring-2 focus:ring-pastelPink/20"
                           />
                         </motion.div>
                       )}
@@ -439,6 +449,12 @@ function ReadyUpApp() {
                 "READY UP"
               )}
             </Button>
+
+            {!window.api && (
+              <div className="mt-3 text-center text-[12px] text-inkDim/80">
+                running in browser dev mode &mdash; Steam launch works once packaged as Electron
+              </div>
+            )}
           </motion.div>
             </>
           )}
@@ -447,7 +463,23 @@ function ReadyUpApp() {
         {/* Right column — Sidebar */}
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4 }} className={cn("flex flex-col lg:w-[340px] lg:flex-shrink-0", showCalendar ? "w-full" : "hidden lg:flex")}>
           {/* Tab bar */}
-          <div className="mb-3 flex gap-1 rounded-xl border border-white/30 bg-white/40 p-1">
+          <div
+            role="tablist"
+            className="mb-3 flex gap-1 rounded-xl border border-white/30 bg-white/40 p-1"
+            onKeyDown={(e) => {
+              const tabs = ["schedule", "stats", "tools", "progress"] as const;
+              const idx = tabs.indexOf(sidebarTab);
+              if (e.key === "ArrowRight") {
+                e.preventDefault();
+                const next = tabs[(idx + 1) % tabs.length];
+                setSidebarTab(next);
+              } else if (e.key === "ArrowLeft") {
+                e.preventDefault();
+                const prev = tabs[(idx - 1 + tabs.length) % tabs.length];
+                setSidebarTab(prev);
+              }
+            }}
+          >
             {([
               { key: "schedule" as const, icon: CalendarDays, label: "Schedule" },
               { key: "stats" as const, icon: BarChart3, label: "Stats" },
@@ -456,6 +488,9 @@ function ReadyUpApp() {
             ]).map(({ key, icon: Icon, label }) => (
               <button
                 key={key}
+                role="tab"
+                aria-selected={sidebarTab === key}
+                tabIndex={sidebarTab === key ? 0 : -1}
                 onClick={() => setSidebarTab(key)}
                 className={cn(
                   "flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2 text-[11px] font-bold transition-all",
@@ -472,7 +507,7 @@ function ReadyUpApp() {
           </div>
 
           {/* Tab content */}
-          <div className="min-h-0 flex-1 overflow-y-auto rounded-3xl border border-pastelPink/20 bg-white/70 shadow-pastel backdrop-blur-sm scrollbar-thin scrollbar-thumb-pastelPink/20 scrollbar-track-transparent">
+          <div className="min-h-0 flex-1 overflow-y-auto rounded-3xl border border-pastelPink/20 bg-[rgba(25,22,40,0.75)] shadow-pastel backdrop-blur-sm scrollbar-thin scrollbar-thumb-pastelPink/20 scrollbar-track-transparent">
             <AnimatePresence mode="wait">
               <motion.div
                 key={sidebarTab}
@@ -483,7 +518,7 @@ function ReadyUpApp() {
                 className="p-4"
               >
                 {sidebarTab === "schedule" && (
-                  <CalendarView onQuickAdd={(type) => { setPostMatchType(type); setShowPostMatch(true); }} />
+                   <CalendarView onQuickAdd={(type) => { setPostMatchType(type); setShowPostMatch(true); }} selectedDate={state.calendarDate} onDateSelect={setCalendarDate} />
                 )}
 
                 {sidebarTab === "stats" && (
@@ -511,13 +546,13 @@ function ReadyUpApp() {
                       onActivate={(id) => { setActiveProfile(id); const profile = (state.launchProfiles || []).find((p) => p.id === id); if (profile) setChecked(new Set(profile.rules)); toast("Profile activated", "success"); }}
                     />
                     <SoundCustomization soundId={state.soundId || "chime"} onChange={setSoundId} />
-                    <PracticeTimer />
+                    <PracticeTimer timerState={state.practiceTimer} onTimerChange={setPracticeTimer} />
                   </div>
                 )}
 
                 {sidebarTab === "progress" && (
                   <div className="space-y-4">
-                    <Achievements state={state} />
+                    <Achievements achievements={state.achievements || []} />
                     <MatchStreak matches={state.matches || []} />
                     <TeamHeatmap matches={state.matches || []} />
                   </div>

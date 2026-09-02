@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { X, BarChart3 } from "lucide-react";
 import type { SessionEntry } from "@/vite-env";
+import { AccessibleModal } from "./AccessibleModal";
 
 export function AddSession({ onAdd, onClose, rulesChecked }: {
   onAdd: (s: Omit<SessionEntry, "date">) => void;
@@ -31,27 +31,14 @@ export function AddSession({ onAdd, onClose, rulesChecked }: {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <motion.form
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
-        onClick={(e) => e.stopPropagation()}
-        onSubmit={handleSubmit}
-        className="w-full max-w-sm rounded-3xl border border-pastelPink/20 bg-white p-5 shadow-pastel-lg"
-      >
+    <AccessibleModal open onClose={onClose} label="Log Session" className="w-full max-w-sm rounded-3xl border border-pastelPink/20 bg-[rgba(25,22,40,0.95)] p-5 shadow-pastel-lg">
+      <form onSubmit={handleSubmit}>
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4 text-pastelBlue" />
             <h3 className="font-display text-lg font-bold text-ink">Log Session</h3>
           </div>
-          <button type="button" onClick={onClose} className="rounded-full p-1 text-inkDim hover:bg-pastelPink/10 hover:text-pink">
+          <button type="button" onClick={onClose} aria-label="Close session log" className="rounded-full p-1 text-inkDim hover:bg-pastelPink/10 hover:text-pink">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -72,7 +59,7 @@ export function AddSession({ onAdd, onClose, rulesChecked }: {
               onChange={(e) => setKd(e.target.value)}
               placeholder="1.25"
               required
-              className="w-full rounded-xl border border-white/40 bg-white/50 px-3 py-2 text-[13px] text-ink outline-none placeholder:text-inkDim/40 focus:border-pastelPink/40"
+              className="w-full rounded-xl border border-white/10 bg-[rgba(25,22,40,0.5)] px-3 py-1.5 text-[13px] text-ink outline-none placeholder:text-pastelPink/40 focus:border-pastelPink/40 focus:ring-2 focus:ring-pastelPink/20"
             />
           </label>
           <label className="flex-1">
@@ -85,7 +72,7 @@ export function AddSession({ onAdd, onClose, rulesChecked }: {
               onChange={(e) => setAdr(e.target.value)}
               placeholder="82.5"
               required
-              className="w-full rounded-xl border border-white/40 bg-white/50 px-3 py-2 text-[13px] text-ink outline-none placeholder:text-inkDim/40 focus:border-pastelPink/40"
+              className="w-full rounded-xl border border-white/10 bg-[rgba(25,22,40,0.5)] px-3 py-1.5 text-[13px] text-ink outline-none placeholder:text-pastelPink/40 focus:border-pastelPink/40 focus:ring-2 focus:ring-pastelPink/20"
             />
           </label>
           <label className="flex-1">
@@ -99,7 +86,7 @@ export function AddSession({ onAdd, onClose, rulesChecked }: {
               onChange={(e) => setHsPercent(e.target.value)}
               placeholder="45"
               required
-              className="w-full rounded-xl border border-white/40 bg-white/50 px-3 py-2 text-[13px] text-ink outline-none placeholder:text-inkDim/40 focus:border-pastelPink/40"
+              className="w-full rounded-xl border border-white/10 bg-[rgba(25,22,40,0.5)] px-3 py-1.5 text-[13px] text-ink outline-none placeholder:text-pastelPink/40 focus:border-pastelPink/40 focus:ring-2 focus:ring-pastelPink/20"
             />
           </label>
         </div>
@@ -111,7 +98,7 @@ export function AddSession({ onAdd, onClose, rulesChecked }: {
             onChange={(e) => setMindsetNote(e.target.value)}
             rows={2}
             placeholder="What's your mindset going into this session?"
-            className="w-full resize-none rounded-xl border border-pastelPink/20 bg-pastelPink/5 px-3 py-2 text-[13px] text-ink outline-none placeholder:text-inkDim/40 focus:border-pastelPink/40"
+            className="w-full resize-none rounded-xl border border-pastelPink/20 bg-[rgba(255,184,217,0.05)] px-3 py-1.5 text-[13px] text-ink outline-none placeholder:text-pastelPink/40 focus:border-pastelPink/40 focus:ring-2 focus:ring-pastelPink/20"
           />
         </label>
 
@@ -122,7 +109,7 @@ export function AddSession({ onAdd, onClose, rulesChecked }: {
             onChange={(e) => setNote(e.target.value)}
             rows={2}
             placeholder="Optional..."
-            className="w-full resize-none rounded-xl border border-white/40 bg-white/50 px-3 py-2 text-[13px] text-ink outline-none placeholder:text-inkDim/40 focus:border-pastelPink/40"
+            className="w-full resize-none rounded-xl border border-white/10 bg-[rgba(25,22,40,0.5)] px-3 py-1.5 text-[13px] text-ink outline-none placeholder:text-pastelPink/40 focus:border-pastelPink/40 focus:ring-2 focus:ring-pastelPink/20"
           />
         </label>
 
@@ -132,7 +119,7 @@ export function AddSession({ onAdd, onClose, rulesChecked }: {
         >
           Save Session
         </button>
-      </motion.form>
-    </motion.div>
+      </form>
+    </AccessibleModal>
   );
 }
