@@ -1,0 +1,6 @@
+{
+  "events": [
+    { "date": "2026-01-10", "title": "League Match", "time": "20:00", "priority": "High" },
+    { "date": "2026-01-24", "title": "League Match", "time": "20:00", "priority": "High" }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "events": [
+    { "day": "Tuesday", "title": "Warmup Session", "time": "17:00", "priority": "Normal" },
+    { "day": "Thursday", "title": "Warmup Session", "time": "17:00", "priority": "Normal" }
+  ]
+}
