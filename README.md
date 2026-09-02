@@ -72,8 +72,8 @@ Think of it as your personal **gaming coach** that lives in your browser.
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/cs2-readyup-web.git
-cd cs2-readyup-web
+git clone https://github.com/INEI-noob/Ready-Up.git
+cd Ready-Up
 
 # Install dependencies
 npm install
