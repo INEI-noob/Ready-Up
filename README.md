@@ -1,65 +1,41 @@
 # Ready Up — CS2 Pre-Game Ritual
 
-A cute, interactive pre-game checklist for CS2: today's practice focus, a
-mascot that reacts as you lock in your Golden Rules, a day streak, and a
-one-click launch into Steam — all running as a real local desktop app.
+A web app for CS2 players to lock in their warmup routine, track focus areas, and build consistency before every session.
 
-Stack: Vite + React + TypeScript + Tailwind CSS + shadcn/ui + lucide-react +
-Framer Motion, wrapped in Electron.
+## Features
+
+- **Daily Warmup Checklist** — Rotates by day of week. Monday is Communication Priming, Tuesday is Anti-Tension & Reset, and so on.
+- **Focus Points** — Editable list of player-specific weaknesses you want to work on. Add, remove, or reorder anytime.
+- **Community Server Manager** — Save your go-to servers for quick connect.
+- **Day Streak** — Tracks how many days in a row you've shown up.
+- **Mascot** — Reacts as you check off your warmup items.
+- **Pre-Game Mindset Notes** — Jot down your mental focus before launching.
+- **Session & Match Logging** — Log K/D, ADR, HS%, map, result, and teammates.
+- **Stats Dashboard** — Overview, session history, team record, personal record, map performance, and weekly comparisons.
+- **Rule Templates** — Save and load sets of focus points.
+- **Keyboard Shortcuts** — Space to launch, 1–9 to toggle warmup items.
 
 ## Setup
 
-```bash
 npm install
-```
-
-## Run it while developing
-
-Starts the Vite dev server and opens it inside an Electron window, with
-hot reload:
-
-```bash
-npm run electron:dev
-```
-
-If you just want to preview the UI in a regular browser tab (no Electron,
-Steam launch falls back to a plain link):
-
-```bash
 npm run dev
-```
 
-## Build a real desktop app
+## Customizing Your Routine
 
-This produces an installer/executable in `release/` — an `.exe` on Windows,
-`.dmg` on macOS, `.AppImage` on Linux — that you can pin to your taskbar or
-desktop and double-click like any other app:
+Edit src/data/routine.ts:
 
-```bash
-npm run electron:build
-```
+- WARMUP_ITEMS — The checklist items for each day of the week.
+- FOCUS_POINTS_DEFAULT — Your personal weakness tracker (editable in-app).
+- ROUTINE — Day-by-day title and description shown in the warmup card.
+- MASCOT_STATES — Mascot captions and mouth shapes at each checked count.
 
-## Customizing your routine
+## Roadmap
 
-Edit `src/data/routine.ts` — `ROUTINE` for the day-by-day focus text, `RULES`
-for your Golden Rules, `MASCOT_STATES` for the mascot's captions/mouth shapes
-at each checked-rule count.
-
-To point the launch button at a different game, change the
-`steam://rungameid/730` string in `electron/main.cjs` (the `steam:launch`
-handler) — 730 is CS2's Steam AppID.
-
-## How state persists
-
-Your streak and session log are stored locally via `electron-store`, which
-writes a small JSON file to your OS's standard app-data folder — no network
-calls, nothing leaves your machine.
-
-## Adding more shadcn components
-
-`components.json` is already configured, so if you want more shadcn/ui
-pieces later (a dialog, a tooltip, etc.):
-
-```bash
-npx shadcn@latest add dialog
-```
+- [ ] Team roster integration with match logging
+- [ ] Utility lineup notebook
+- [ ] Practice mode timer
+- [ ] Custom warmup templates
+- [ ] Stats dashboard improvements
+- [ ] Share/export routines
+- [ ] User accounts + cloud sync
+- [ ] Electron desktop app
