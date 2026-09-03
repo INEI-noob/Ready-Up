@@ -2,7 +2,6 @@
 
 ![Version](https://img.shields.io/badge/version-1.0.0-pink)
 ![License](https://img.shields.io/badge/license-MIT-blue)
-![CS2](https://img.shields.io/badge/CS2-ready-orange)
 ![Stack](https://img.shields.io/badge/stack-React%20%2B%20Vite%20%2B%20Tailwind-8B85F5)
 
 Stop queuing cold. Build a ritual.
