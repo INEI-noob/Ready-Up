@@ -260,28 +260,6 @@ function ReadyUpApp() {
         {/* Left column — Launcher */}
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4 }} className="hidden flex-col gap-4 lg:flex">
           <div className="rounded-3xl border border-pastelPink/20 bg-[rgba(25,22,40,0.75)] p-4 shadow-pastel backdrop-blur-sm">
-            <div className="mb-3 flex items-center gap-1.5">
-              <Sparkles className="h-3 w-3 text-pastelPink" />
-              <span className="font-mono text-[10px] tracking-wider text-inkDim">LAUNCHER</span>
-            </div>
-            <Button
-              variant="idle"
-              size="lg"
-              onClick={async () => {
-                if (window.api) {
-                  const result = await window.api.launchSteam();
-                  if (result.ok) toast("Launched CS2!", "success");
-                  else toast("Couldn't reach Steam", "error");
-                } else {
-                  window.location.href = "steam://rungameid/730";
-                  toast("Launched CS2!", "success");
-                }
-              }}
-            >
-              <span className="flex items-center gap-2">LAUNCH GAME</span>
-            </Button>
-          </div>
-          <div className="rounded-3xl border border-pastelPink/20 bg-[rgba(25,22,40,0.75)] p-4 shadow-pastel backdrop-blur-sm">
             <CommunityServers
               servers={state.servers || []}
               onSave={(s) => { saveServer(s); toast("Server saved", "success"); }}
