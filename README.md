@@ -1,65 +1,54 @@
-# Ready Up — CS2 Pre-Game Ritual
+# Ready Up
 
-A cute, interactive pre-game checklist for CS2: today's practice focus, a
-mascot that reacts as you lock in your Golden Rules, a day streak, and a
-one-click launch into Steam — all running as a real local desktop app.
+![Version](https://img.shields.io/badge/version-1.0.0-pink)
+![License](https://img.shields.io/badge/license-MIT-blue)
+![CS2](https://img.shields.io/badge/CS2-ready-orange)
+![Stack](https://img.shields.io/badge/stack-React%20%2B%20Vite%20%2B%20Tailwind-8B85F5)
 
-Stack: Vite + React + TypeScript + Tailwind CSS + shadcn/ui + lucide-react +
-Framer Motion, wrapped in Electron.
+Stop queuing cold. Build a ritual.
+
+Ready Up is your pre-game warmup companion for CS2. Daily drills that rotate by the day of the week, a focus tracker for your weakest habits, and a streak counter that'll make you feel guilty about skipping leg day — I mean, warmup day.
+
+## Features
+
+- **Daily Warmup Checklist** — Each day has its own drill. Monday you work on callouts. Tuesday you tame the AWP jitter. Wednesday you learn to trade instead of ego-peeking. You get the idea.
+- **Focus Points** — Your personal hit list of bad habits. Crosshair placement. Over-rotating. Tilting in voice chat. Edit them whenever your coach (you) sees something new.
+- **Community Server Manager** — Save your go-to retake servers, 1v1 arenas, or DM hubs. One click to connect.
+- **Day Streak** — Shows up every day and the number goes up. Miss a day and feel the shame.
+- **Mascot** — A little guy that gets more hyped as you check off your warmup. Simple motivation.
+- **Pre-Game Mindset Notes** — Write down one thing to focus on before you launch. "Don't tilt. Trade kills. Breathe."
+- **Session & Match Logging** — Log your K/D, ADR, HS%, map, result, and who you played with.
+- **Stats Dashboard** — See your trends over time. Best map, worst map, average stats, weekly comparison. Numbers don't lie.
+- **Rule Templates** — Save a set of focus points and load them later. Make one for scrim days, one for Premier, one for when you're feeling washed.
+- **Keyboard Shortcuts** — Space to launch. 1–9 to toggle warmup items. No mouse required.
 
 ## Setup
 
 ```bash
 npm install
-```
-
-## Run it while developing
-
-Starts the Vite dev server and opens it inside an Electron window, with
-hot reload:
-
-```bash
-npm run electron:dev
-```
-
-If you just want to preview the UI in a regular browser tab (no Electron,
-Steam launch falls back to a plain link):
-
-```bash
 npm run dev
 ```
 
-## Build a real desktop app
+## Customizing Your Routine
 
-This produces an installer/executable in `release/` — an `.exe` on Windows,
-`.dmg` on macOS, `.AppImage` on Linux — that you can pin to your taskbar or
-desktop and double-click like any other app:
+Open `src/data/routine.ts` and make it yours:
 
-```bash
-npm run electron:build
-```
+- `WARMUP_ITEMS` — The checklist for each day. Change the drills, add new ones, remove the ones you've already mastered.
+- `FOCUS_POINTS_DEFAULT` — Your weakness tracker. Start with the defaults and swap in whatever you're actually working on.
+- `ROUTINE` — The title and description shown in the warmup card for each day.
+- `MASCOT_STATES` — What the mascot says and how his mouth moves at each progress level. Yes, this matters.
 
-## Customizing your routine
+## Roadmap
 
-Edit `src/data/routine.ts` — `ROUTINE` for the day-by-day focus text, `RULES`
-for your Golden Rules, `MASCOT_STATES` for the mascot's captions/mouth shapes
-at each checked-rule count.
+- [ ] Team roster integration with match logging
+- [ ] Utility lineup notebook
+- [ ] Practice mode timer
+- [ ] Custom warmup templates
+- [ ] Stats dashboard improvements
+- [ ] Share/export routines
+- [ ] User accounts + cloud sync
+- [ ] Electron desktop app
 
-To point the launch button at a different game, change the
-`steam://rungameid/730` string in `electron/main.cjs` (the `steam:launch`
-handler) — 730 is CS2's Steam AppID.
+## License
 
-## How state persists
-
-Your streak and session log are stored locally via `electron-store`, which
-writes a small JSON file to your OS's standard app-data folder — no network
-calls, nothing leaves your machine.
-
-## Adding more shadcn components
-
-`components.json` is already configured, so if you want more shadcn/ui
-pieces later (a dialog, a tooltip, etc.):
-
-```bash
-npx shadcn@latest add dialog
-```
+MIT — do whatever you want with it, just don't blame me when you still can't hit the flick.
