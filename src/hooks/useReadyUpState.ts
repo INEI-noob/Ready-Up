@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import type { ReadyUpState, SessionEntry, MatchEntry, RuleTemplate, LaunchProfile, Achievement, SoundId, CommunityServer, PracticeTimerState, LineupNote } from "@/vite-env";
+import type { ReadyUpState, SessionEntry, MatchEntry, RuleTemplate, LaunchProfile, Achievement, SoundId, CommunityServer, PracticeTimerState, LineupNote, CalendarUserEvent } from "@/vite-env";
 
 const LS_KEY = "cs2-readyup-state";
 const DEFAULT_STATE: ReadyUpState = {
@@ -25,6 +25,7 @@ const DEFAULT_STATE: ReadyUpState = {
   practiceTimer: { phase: 0, remaining: 300, running: false, customDurations: {}, lastTick: null },
   ruleHistory: [],
   lineups: [],
+  calendarEvents: [],
 };
 
 async function readState(): Promise<ReadyUpState> {
@@ -52,6 +53,7 @@ async function readState(): Promise<ReadyUpState> {
       practiceTimer: parsed.practiceTimer ?? { phase: 0, remaining: 300, running: false, customDurations: {}, lastTick: null },
       ruleHistory: parsed.ruleHistory ?? [],
       lineups: parsed.lineups ?? [],
+      calendarEvents: parsed.calendarEvents ?? [],
     };
   } catch {
     return DEFAULT_STATE;
@@ -156,6 +158,39 @@ export function useReadyUpState() {
       ...current,
       matches: [...(current.matches || []), entry].slice(-199),
     };
+    await writeState(next);
+    setState(next);
+    return next;
+  }, []);
+
+  const updateSession = useCallback(async (date: string, updates: Partial<SessionEntry>) => {
+    const current = await readState();
+    const sessions = (current.sessions || []).map((s) =>
+      s.date === date ? { ...s, ...updates } : s
+    );
+    const next: ReadyUpState = { ...current, sessions };
+    await writeState(next);
+    setState(next);
+    return next;
+  }, []);
+
+  const deleteSession = useCallback(async (date: string) => {
+    const current = await readState();
+    const next: ReadyUpState = {
+      ...current,
+      sessions: (current.sessions || []).filter((s) => s.date !== date),
+    };
+    await writeState(next);
+    setState(next);
+    return next;
+  }, []);
+
+  const updateMatch = useCallback(async (id: string, updates: Partial<MatchEntry>) => {
+    const current = await readState();
+    const matches = (current.matches || []).map((m) =>
+      m.id === id ? { ...m, ...updates } : m
+    );
+    const next: ReadyUpState = { ...current, matches };
     await writeState(next);
     setState(next);
     return next;
@@ -301,6 +336,24 @@ export function useReadyUpState() {
     setState(next);
   }, []);
 
+  const saveCalendarEvent = useCallback(async (event: CalendarUserEvent) => {
+    const current = await readState();
+    const existing = (current.calendarEvents || []).filter((e) => e.id !== event.id);
+    const next: ReadyUpState = { ...current, calendarEvents: [...existing, event] };
+    await writeState(next);
+    setState(next);
+  }, []);
+
+  const deleteCalendarEvent = useCallback(async (id: string) => {
+    const current = await readState();
+    const next: ReadyUpState = {
+      ...current,
+      calendarEvents: (current.calendarEvents || []).filter((e) => e.id !== id),
+    };
+    await writeState(next);
+    setState(next);
+  }, []);
+
   const exportData = useCallback(async (): Promise<string> => {
     const current = await readState();
     return JSON.stringify(current, null, 2);
@@ -322,6 +375,7 @@ export function useReadyUpState() {
       servers: parsed.servers ?? [],
       ruleHistory: parsed.ruleHistory ?? [],
       lineups: parsed.lineups ?? [],
+      calendarEvents: parsed.calendarEvents ?? [],
     };
     await writeState(next);
     setState(next);
@@ -354,12 +408,13 @@ export function useReadyUpState() {
 
   return {
     state, loaded,
-    commitToday, addSession, addMatch, deleteMatch,
+    commitToday, addSession, updateSession, deleteSession, addMatch, updateMatch, deleteMatch,
     setTeamRoster, setOnboardingComplete,
     saveRuleTemplate, deleteRuleTemplate, archiveOldSessions,
     setViewMode, saveLaunchProfile, deleteLaunchProfile, setActiveProfile,
     setAchievements, setSoundId, saveServer, deleteServer, exportData, importData,
     setSidebarTab, setCalendarDate, setDailyRules, setPracticeTimer,
     saveLineup, deleteLineup,
+    saveCalendarEvent, deleteCalendarEvent,
   };
 }

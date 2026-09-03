@@ -81,6 +81,79 @@ export type LineupNote = {
   createdAt: string;
 };
 
+export type CalendarEventType = "Prac" | "Warmup" | "Scrim" | "Official" | "Teambuilding";
+export type CalendarPriority = "High" | "Normal";
+
+export type CalendarUserEvent = {
+  id: string;
+  date: string;
+  title: string;
+  type: CalendarEventType;
+  time?: string;
+  priority: CalendarPriority;
+};
+
+export type TrackerPremierStats = {
+  elo: string;
+  best: string;
+  matches: string;
+  kd: string;
+  hs: string;
+};
+
+export type TrackerFaceitStats = {
+  elo: string;
+  skillLevel: string;
+  matches: string;
+  kd: string;
+  hs: string;
+  winRate: string;
+};
+
+export type TrackerCompRank = {
+  map: string;
+  rank: string;
+  wins: string;
+};
+
+export type TrackerRecentMatch = {
+  result: "WIN" | "LOSS" | "TIE";
+  map: string;
+  score: string;
+  kd: string;
+  adr: string;
+  hs: string;
+};
+
+export type TrackerStats = {
+  steamId: string;
+  profileName: string;
+  avatar: string;
+  profileUrl: string;
+  country: string;
+  personaState: string;
+  accountAge: string;
+  playtime: string;
+  level: string;
+  friends: string;
+  friendsCount: string;
+  overall: { kd: string; hs: string; accuracy: string; adr: string; matchesPlayed: string; matchesWon: string };
+  premier: TrackerPremierStats;
+  faceit: TrackerFaceitStats;
+  leetify: { aim: string; positioning: string; utility: string; opening: string; clutch: string; gamesPlayed: string };
+  compRanks: TrackerCompRank[];
+  reactionMs: string;
+  rifleHs: string;
+  rifleAccuracy: string;
+  winRate: string;
+  headshotOverall: string;
+  cheatingPercent: string;
+  cheatingLabel: string;
+  timeToDamage: string;
+  recentMatches: TrackerRecentMatch[];
+  fetchedAt: string;
+};
+
 export type ReadyUpState = {
   streak: number;
   lastDate: string | null;
@@ -104,6 +177,7 @@ export type ReadyUpState = {
   practiceTimer: PracticeTimerState;
   ruleHistory: RuleHistoryEntry[];
   lineups: LineupNote[];
+  calendarEvents: CalendarUserEvent[];
 };
 
 export interface ReadyUpAPI {

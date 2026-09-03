@@ -41,7 +41,7 @@ function StatCard({ label, value, sub }: { label: string; value: string | number
   );
 }
 
-function MatchRow({ match, showType = false, onDelete }: { match: MatchEntry; showType?: boolean; onDelete?: (id: string) => void }) {
+function MatchRow({ match, showType = false, onDelete, onEdit }: { match: MatchEntry; showType?: boolean; onDelete?: (id: string) => void; onEdit?: (match: MatchEntry) => void }) {
   const resultColor = match.result === "W"
     ? "text-okDark bg-pastelMint/15"
     : match.result === "L"
@@ -86,9 +86,14 @@ function MatchRow({ match, showType = false, onDelete }: { match: MatchEntry; sh
         <div className="mt-1 font-mono text-[10px] text-inkDim">{match.teamPlayers.join(", ")}</div>
       )}
       {match.note && <div className="mt-1 text-[10px] text-inkDim/80">{match.note}</div>}
-      {onDelete && (
-        <div className="mt-1.5 border-t border-white/30 pt-1.5">
-          <button onClick={() => onDelete(match.id)} className="text-[10px] text-inkDim/40 hover:text-pink transition-colors">Delete</button>
+      {(onDelete || onEdit) && (
+        <div className="mt-1.5 flex gap-3 border-t border-white/30 pt-1.5">
+          {onEdit && (
+            <button onClick={() => onEdit(match)} className="text-[10px] text-inkDim/40 hover:text-pastelBlue transition-colors">Edit</button>
+          )}
+          {onDelete && (
+            <button onClick={() => onDelete(match.id)} className="text-[10px] text-inkDim/40 hover:text-pink transition-colors">Delete</button>
+          )}
         </div>
       )}
     </motion.div>
@@ -301,7 +306,7 @@ function Overview({ state }: { state: ReadyUpState }) {
   );
 }
 
-function Sessions({ state, onAddSession }: { state: ReadyUpState; onAddSession: () => void }) {
+function Sessions({ state, onAddSession, onEditSession, onDeleteSession }: { state: ReadyUpState; onAddSession: () => void; onEditSession?: (session: import("@/vite-env").SessionEntry) => void; onDeleteSession?: (date: string) => void }) {
   const [view, setView] = useState<"log" | "compare">("log");
   const sessions = [...(state.sessions || [])].reverse();
 
@@ -365,6 +370,16 @@ function Sessions({ state, onAddSession }: { state: ReadyUpState; onAddSession: 
                   </div>
                   {s.mindsetNote && <div className="mt-1 font-mono text-[10px] text-pastelPink/60">{s.mindsetNote}</div>}
                   {s.note && <div className="mt-1 text-[11px] text-inkDim/80">{s.note}</div>}
+                  {(onEditSession || onDeleteSession) && (
+                    <div className="mt-1.5 flex gap-3 border-t border-white/30 pt-1.5">
+                      {onEditSession && (
+                        <button onClick={() => onEditSession(s)} className="text-[10px] text-inkDim/40 hover:text-pastelBlue transition-colors">Edit</button>
+                      )}
+                      {onDeleteSession && (
+                        <button onClick={() => onDeleteSession(s.date)} className="text-[10px] text-inkDim/40 hover:text-pink transition-colors">Delete</button>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -377,7 +392,7 @@ function Sessions({ state, onAddSession }: { state: ReadyUpState; onAddSession: 
   );
 }
 
-function TeamMatches({ state, onAddMatch, onDeleteMatch }: { state: ReadyUpState; onAddMatch: () => void; onDeleteMatch?: (id: string) => void }) {
+function TeamMatches({ state, onAddMatch, onDeleteMatch, onEditMatch }: { state: ReadyUpState; onAddMatch: () => void; onDeleteMatch?: (id: string) => void; onEditMatch?: (match: MatchEntry) => void }) {
   const allTeam = [...(state.matches || [])].filter((m) => m.type !== "personal").reverse();
   const { filters, setFilters, filtered, activeCount } = useMatchFilters(allTeam);
 
@@ -391,7 +406,7 @@ function TeamMatches({ state, onAddMatch, onDeleteMatch }: { state: ReadyUpState
       </div>
       <MatchFilterBar filters={filters} setFilters={setFilters} activeCount={activeCount} onClear={() => setFilters({ search: "", map: "all", result: "all", dateRange: "all" })} />
       {filtered.length > 0 ? (
-        <div className="space-y-1.5">{filtered.map((m) => <MatchRow key={m.id} match={m} showType onDelete={onDeleteMatch} />)}</div>
+        <div className="space-y-1.5">{filtered.map((m) => <MatchRow key={m.id} match={m} showType onDelete={onDeleteMatch} onEdit={onEditMatch} />)}</div>
       ) : (
         <div className="rounded-xl border border-white/40 bg-white/30 p-4 text-center text-[12px] text-inkDim/80">
           {activeCount > 0 ? "No matches match your filters" : "No team matches logged yet"}
@@ -401,7 +416,7 @@ function TeamMatches({ state, onAddMatch, onDeleteMatch }: { state: ReadyUpState
   );
 }
 
-function PersonalMatches({ state, onAddMatch, onDeleteMatch }: { state: ReadyUpState; onAddMatch: () => void; onDeleteMatch?: (id: string) => void }) {
+function PersonalMatches({ state, onAddMatch, onDeleteMatch, onEditMatch }: { state: ReadyUpState; onAddMatch: () => void; onDeleteMatch?: (id: string) => void; onEditMatch?: (match: MatchEntry) => void }) {
   const allPersonal = [...(state.matches || [])].filter((m) => m.type === "personal").reverse();
   const { filters, setFilters, filtered, activeCount } = useMatchFilters(allPersonal);
 
@@ -415,7 +430,7 @@ function PersonalMatches({ state, onAddMatch, onDeleteMatch }: { state: ReadyUpS
       </div>
       <MatchFilterBar filters={filters} setFilters={setFilters} activeCount={activeCount} onClear={() => setFilters({ search: "", map: "all", result: "all", dateRange: "all" })} />
       {filtered.length > 0 ? (
-        <div className="space-y-1.5">{filtered.map((m) => <MatchRow key={m.id} match={m} onDelete={onDeleteMatch} />)}</div>
+        <div className="space-y-1.5">{filtered.map((m) => <MatchRow key={m.id} match={m} onDelete={onDeleteMatch} onEdit={onEditMatch} />)}</div>
       ) : (
         <div className="rounded-xl border border-white/40 bg-white/30 p-4 text-center text-[12px] text-inkDim/80">
           {activeCount > 0 ? "No matches match your filters" : "No personal games logged yet"}
@@ -425,11 +440,14 @@ function PersonalMatches({ state, onAddMatch, onDeleteMatch }: { state: ReadyUpS
   );
 }
 
-export function Stats({ state, onAddSession, onAddMatch, onDeleteMatch, onOpenRoster, onExport, onImport, onSaveTemplate, onDeleteTemplate, onLoadTemplate }: {
+export function Stats({ state, onAddSession, onAddMatch, onDeleteMatch, onEditMatch, onEditSession, onDeleteSession, onOpenRoster, onExport, onImport, onSaveTemplate, onDeleteTemplate, onLoadTemplate }: {
   state: ReadyUpState;
   onAddSession: () => void;
   onAddMatch: () => void;
   onDeleteMatch?: (id: string) => void;
+  onEditMatch?: (match: MatchEntry) => void;
+  onEditSession?: (session: import("@/vite-env").SessionEntry) => void;
+  onDeleteSession?: (date: string) => void;
   onOpenRoster: () => void;
   onExport: () => void;
   onImport: () => void;
@@ -476,9 +494,9 @@ export function Stats({ state, onAddSession, onAddMatch, onDeleteMatch, onOpenRo
       <AnimatePresence mode="wait">
         <motion.div key={tab} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.2 }}>
           {tab === "overview" && <Overview state={state} />}
-          {tab === "sessions" && <Sessions state={state} onAddSession={onAddSession} />}
-          {tab === "team" && <TeamMatches state={state} onAddMatch={onAddMatch} onDeleteMatch={onDeleteMatch} />}
-          {tab === "personal" && <PersonalMatches state={state} onAddMatch={onAddMatch} onDeleteMatch={onDeleteMatch} />}
+          {tab === "sessions" && <Sessions state={state} onAddSession={onAddSession} onEditSession={onEditSession} onDeleteSession={onDeleteSession} />}
+          {tab === "team" && <TeamMatches state={state} onAddMatch={onAddMatch} onDeleteMatch={onDeleteMatch} onEditMatch={onEditMatch} />}
+          {tab === "personal" && <PersonalMatches state={state} onAddMatch={onAddMatch} onDeleteMatch={onDeleteMatch} onEditMatch={onEditMatch} />}
         </motion.div>
       </AnimatePresence>
 

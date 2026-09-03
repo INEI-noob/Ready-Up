@@ -3,40 +3,55 @@ import { X, BarChart3 } from "lucide-react";
 import type { SessionEntry } from "@/vite-env";
 import { AccessibleModal } from "./AccessibleModal";
 
-export function AddSession({ onAdd, onClose, rulesChecked }: {
-  onAdd: (s: Omit<SessionEntry, "date">) => void;
+export function AddSession({ onAdd, onSave, onClose, rulesChecked, editData }: {
+  onAdd?: (s: Omit<SessionEntry, "date">) => void;
+  onSave?: (s: SessionEntry) => void;
   onClose: () => void;
   rulesChecked: number;
+  editData?: SessionEntry;
 }) {
-  const [kd, setKd] = useState("");
-  const [adr, setAdr] = useState("");
-  const [hsPercent, setHsPercent] = useState("");
-  const [note, setNote] = useState("");
-  const [mindsetNote, setMindsetNote] = useState("");
+  const isEdit = !!editData;
+  const [kd, setKd] = useState(editData?.kd != null ? String(editData.kd) : "");
+  const [adr, setAdr] = useState(editData?.adr != null ? String(editData.adr) : "");
+  const [hsPercent, setHsPercent] = useState(editData?.hsPercent != null ? String(editData.hsPercent) : "");
+  const [note, setNote] = useState(editData?.note ?? "");
+  const [mindsetNote, setMindsetNote] = useState(editData?.mindsetNote ?? "");
 
-  const dayName = new Date().toLocaleDateString("en-US", { weekday: "long" });
+  const dayName = editData?.day ?? new Date().toLocaleDateString("en-US", { weekday: "long" });
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    onAdd({
-      day: dayName,
-      kd: Number(kd) || 0,
-      adr: Number(adr) || 0,
-      hsPercent: Number(hsPercent) || 0,
-      rulesChecked,
-      note: note.trim() || undefined,
-      mindsetNote: mindsetNote.trim() || undefined,
-    });
+    if (isEdit && onSave && editData) {
+      onSave({
+        ...editData,
+        day: dayName,
+        kd: Number(kd) || 0,
+        adr: Number(adr) || 0,
+        hsPercent: Number(hsPercent) || 0,
+        note: note.trim() || undefined,
+        mindsetNote: mindsetNote.trim() || undefined,
+      });
+    } else if (onAdd) {
+      onAdd({
+        day: dayName,
+        kd: Number(kd) || 0,
+        adr: Number(adr) || 0,
+        hsPercent: Number(hsPercent) || 0,
+        rulesChecked,
+        note: note.trim() || undefined,
+        mindsetNote: mindsetNote.trim() || undefined,
+      });
+    }
     onClose();
   }
 
   return (
-    <AccessibleModal open onClose={onClose} label="Log Session" className="w-full max-w-sm rounded-3xl border border-pastelPink/20 bg-[rgba(25,22,40,0.95)] p-5 shadow-pastel-lg">
+    <AccessibleModal open onClose={onClose} label={isEdit ? "Edit Session" : "Log Session"} className="w-full max-w-sm rounded-3xl border border-pastelPink/20 bg-[rgba(25,22,40,0.95)] p-5 shadow-pastel-lg">
       <form onSubmit={handleSubmit}>
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4 text-pastelBlue" />
-            <h3 className="font-display text-lg font-bold text-ink">Log Session</h3>
+            <h3 className="font-display text-lg font-bold text-ink">{isEdit ? "Edit Session" : "Log Session"}</h3>
           </div>
           <button type="button" onClick={onClose} aria-label="Close session log" className="rounded-full p-1 text-inkDim hover:bg-pastelPink/10 hover:text-pink">
             <X className="h-4 w-4" />
@@ -117,7 +132,7 @@ export function AddSession({ onAdd, onClose, rulesChecked }: {
           type="submit"
           className="w-full rounded-full bg-gradient-to-r from-pastelPink via-pastelLavender to-pastelBlue py-2.5 font-display text-sm font-bold text-white shadow-pastel transition-all hover:-translate-y-0.5 hover:shadow-pastel-lg"
         >
-          Save Session
+          {isEdit ? "Save Changes" : "Save Session"}
         </button>
       </form>
     </AccessibleModal>

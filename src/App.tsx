@@ -25,6 +25,7 @@ import { CommunityServers } from "@/components/CommunityServers";
 import { RuleTrends } from "@/components/RuleTrends";
 import { WeeklyRecap } from "@/components/WeeklyRecap";
 import { LineupNotebook } from "@/components/LineupNotebook";
+import { AddCalendarEvent } from "@/components/AddCalendarEvent";
 import { ToastProvider, useToast } from "@/components/Toast";
 import { useReadyUpState } from "@/hooks/useReadyUpState";
 import { ROUTINE, FALLBACK_FOCUS, FOCUS_POINTS_DEFAULT, getTodayWarmupItems } from "@/data/routine";
@@ -92,7 +93,7 @@ function ReadyUpApp() {
   const focus = ROUTINE[dayName] ?? FALLBACK_FOCUS;
   const dateLabel = useMemo(() => `${dayName.toUpperCase()} \u00B7 ${now.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`, [dayName, now]);
 
-  const { state, loaded, commitToday, addSession, addMatch, deleteMatch, setTeamRoster, setOnboardingComplete, saveRuleTemplate, deleteRuleTemplate, archiveOldSessions, setViewMode, saveLaunchProfile, deleteLaunchProfile, setActiveProfile, setAchievements, setSoundId, saveServer, deleteServer, exportData, importData, setSidebarTab, setCalendarDate, setDailyRules, setPracticeTimer, saveLineup, deleteLineup } = useReadyUpState();
+  const { state, loaded, commitToday, addSession, updateSession, deleteSession, addMatch, updateMatch, deleteMatch, setTeamRoster, setOnboardingComplete, saveRuleTemplate, deleteRuleTemplate, archiveOldSessions, setViewMode, saveLaunchProfile, deleteLaunchProfile, setActiveProfile, setAchievements, setSoundId, saveServer, deleteServer, exportData, importData, setSidebarTab, setCalendarDate, setDailyRules, setPracticeTimer, saveLineup, deleteLineup, saveCalendarEvent, deleteCalendarEvent } = useReadyUpState();
   const [checked, setChecked] = useState<Set<string>>(new Set());
   const [launching, setLaunching] = useState(false);
   const [confetti, setConfetti] = useState(false);
@@ -100,6 +101,10 @@ function ReadyUpApp() {
   const [showAddSession, setShowAddSession] = useState(false);
   const [showPostMatch, setShowPostMatch] = useState(false);
   const [postMatchType, setPostMatchType] = useState<"scrim" | "official">("scrim");
+  const [editingSession, setEditingSession] = useState<import("@/vite-env").SessionEntry | null>(null);
+  const [editingMatch, setEditingMatch] = useState<import("@/vite-env").MatchEntry | null>(null);
+  const [showAddCalendarEvent, setShowAddCalendarEvent] = useState(false);
+  const [editingCalendarEvent, setEditingCalendarEvent] = useState<import("@/vite-env").CalendarUserEvent | null>(null);
   const [showRoster, setShowRoster] = useState(false);
   const [mindsetNote, setMindsetNote] = useState("");
   const [showMindset, setShowMindset] = useState(false);
@@ -258,7 +263,7 @@ function ReadyUpApp() {
       <div className="grid w-full max-w-[1200px] grid-cols-1 gap-6 lg:grid-cols-3 lg:items-start">
 
         {/* Left column — Launcher */}
-        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4 }} className="hidden flex-col gap-4 lg:flex">
+        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4 }} className="hidden max-h-[calc(100vh-2rem)] flex-col gap-4 overflow-y-auto lg:flex scrollbar-thin scrollbar-thumb-pastelPink/20 scrollbar-track-transparent">
           <div className="rounded-3xl border border-pastelPink/20 bg-[rgba(25,22,40,0.75)] p-4 shadow-pastel backdrop-blur-sm">
             <CommunityServers
               servers={state.servers || []}
@@ -488,7 +493,15 @@ function ReadyUpApp() {
                 className="p-4"
               >
                 {sidebarTab === "schedule" && (
-                   <CalendarView onQuickAdd={(type) => { setPostMatchType(type); setShowPostMatch(true); }} selectedDate={state.calendarDate} onDateSelect={setCalendarDate} />
+                   <CalendarView
+                     onQuickAdd={(type) => { setPostMatchType(type); setShowPostMatch(true); }}
+                     selectedDate={state.calendarDate}
+                     onDateSelect={setCalendarDate}
+                     userEvents={state.calendarEvents || []}
+                     onSaveEvent={(evt) => { setEditingCalendarEvent(evt); setShowAddCalendarEvent(true); }}
+                     onDeleteEvent={(id) => { deleteCalendarEvent(id); toast("Event deleted", "info"); }}
+                     onAddEvent={() => { setEditingCalendarEvent(null); setShowAddCalendarEvent(true); }}
+                   />
                 )}
 
                 {sidebarTab === "stats" && (
@@ -497,6 +510,9 @@ function ReadyUpApp() {
                     onAddSession={() => setShowAddSession(true)}
                     onAddMatch={() => setShowPostMatch(true)}
                     onDeleteMatch={(id) => { deleteMatch(id); toast("Match deleted", "info"); }}
+                    onEditMatch={(match) => { setEditingMatch(match); setShowPostMatch(true); }}
+                    onEditSession={(session) => { setEditingSession(session); setShowAddSession(true); }}
+                    onDeleteSession={(date) => { deleteSession(date); toast("Session deleted", "info"); }}
                     onOpenRoster={() => setShowRoster(true)}
                     onExport={handleExport}
                     onImport={handleImport}
@@ -545,21 +561,30 @@ function ReadyUpApp() {
         {showAddSession && (
           <AddSession
             rulesChecked={checked.size}
+            editData={editingSession || undefined}
             onAdd={(s) => {
               const withMindset = mindsetNote.trim() ? { ...s, mindsetNote: mindsetNote.trim() } : s;
               addSession(withMindset);
               setShowAddSession(false);
               setShowPostMatch(true);
             }}
-            onClose={() => setShowAddSession(false)}
+            onSave={(s) => {
+              updateSession(s.date, s);
+              setShowAddSession(false);
+              setEditingSession(null);
+              toast("Session updated", "success");
+            }}
+            onClose={() => { setShowAddSession(false); setEditingSession(null); }}
           />
         )}
         {showPostMatch && (
           <PostMatchPrompt
             onAdd={(m) => { addMatch(m); setShowPostMatch(false); }}
-            onClose={() => setShowPostMatch(false)}
+            onSave={(m) => { updateMatch(m.id, m); setShowPostMatch(false); setEditingMatch(null); toast("Match updated", "success"); }}
+            onClose={() => { setShowPostMatch(false); setEditingMatch(null); }}
             roster={state.teamRoster}
             defaultType={postMatchType}
+            editData={editingMatch || undefined}
           />
         )}
         {showRoster && (
@@ -567,6 +592,19 @@ function ReadyUpApp() {
             roster={state.teamRoster || []}
             onSave={setTeamRoster}
             onClose={() => setShowRoster(false)}
+          />
+        )}
+        {showAddCalendarEvent && (
+          <AddCalendarEvent
+            selectedDate={state.calendarDate || new Date().toISOString().slice(0, 10)}
+            editData={editingCalendarEvent || undefined}
+            onSave={(evt) => {
+              saveCalendarEvent(evt);
+              setShowAddCalendarEvent(false);
+              setEditingCalendarEvent(null);
+              toast(editingCalendarEvent ? "Event updated" : "Event added", "success");
+            }}
+            onClose={() => { setShowAddCalendarEvent(false); setEditingCalendarEvent(null); }}
           />
         )}
       </AnimatePresence>

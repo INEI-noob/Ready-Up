@@ -1,10 +1,10 @@
 {
   "_comment": "Add official match events here. priority: High = shows in Upcoming, Normal = calendar only.",
   "events": [
-    { "date": "2026-09-09", "title": "B4I: ZA Season 1 Round 1", "time": "19:00", "priority": "High" },
-    { "date": "2026-09-16", "title": "B4I: ZA Season 1 Round 2", "time": "19:00", "priority": "High" },
-    { "date": "2026-09-30", "title": "B4I: ZA Season 1 Round 3", "time": "19:00", "priority": "High" },
-    { "date": "2026-10-07", "title": "B4I: ZA Season 1 Round 4", "time": "19:00", "priority": "High" },
-    { "date": "2026-10-21", "title": "B4I: ZA Season 1 Round 5", "time": "19:00", "priority": "High" }
+    { "date": "2026-09-09", "title": "placeholder", "time": "19:00", "priority": "High" },
+    { "date": "2026-09-16", "title": "placeholder", "time": "19:00", "priority": "High" },
+    { "date": "2026-09-30", "title": "placeholder", "time": "19:00", "priority": "High" },
+    { "date": "2026-10-07", "title": "placeholder", "time": "19:00", "priority": "High" },
+    { "date": "2026-10-21", "title": "placeholder", "time": "19:00", "priority": "High" }
   ]
 }

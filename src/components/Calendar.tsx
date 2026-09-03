@@ -1,7 +1,8 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, PenLine } from "lucide-react";
+import { ChevronLeft, ChevronRight, PenLine, Plus, Pencil, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { CalendarUserEvent } from "@/vite-env";
 
 import warmupData from "@/data/events/warmup.json";
 import scrimData from "@/data/events/scrim.json";
@@ -18,6 +19,8 @@ interface CalendarEvent {
   type: EventType;
   time?: string;
   priority: Priority;
+  id?: string;
+  isUserEvent?: boolean;
 }
 
 const EVENT_COLORS: Record<EventType, { bg: string; dot: string; text: string; border: string }> = {
@@ -147,7 +150,15 @@ function parseWeeklyEvents(
   return events;
 }
 
-export function Calendar({ onQuickAdd, selectedDate: controlledDate, onDateSelect }: { onQuickAdd?: (type: "scrim" | "official") => void; selectedDate?: string | null; onDateSelect?: (date: string | null) => void }) {
+export function Calendar({ onQuickAdd, selectedDate: controlledDate, onDateSelect, userEvents = [], onSaveEvent, onDeleteEvent, onAddEvent }: {
+  onQuickAdd?: (type: "scrim" | "official") => void;
+  selectedDate?: string | null;
+  onDateSelect?: (date: string | null) => void;
+  userEvents?: CalendarUserEvent[];
+  onSaveEvent?: (event: CalendarUserEvent) => void;
+  onDeleteEvent?: (id: string) => void;
+  onAddEvent?: () => void;
+}) {
   const today = useMemo(() => new Date(), []);
   const [currentMonth, setCurrentMonth] = useState(today.getMonth());
   const [currentYear, setCurrentYear] = useState(today.getFullYear());
@@ -167,8 +178,18 @@ export function Calendar({ onQuickAdd, selectedDate: controlledDate, onDateSelec
 
     const weekly = parseWeeklyEvents(warmupData, "Warmup", monthDates);
 
-    return [...dated, ...weekly];
-  }, [currentYear, currentMonth]);
+    const userMapped: CalendarEvent[] = userEvents.map((e) => ({
+      date: e.date,
+      title: e.title,
+      type: e.type,
+      time: e.time,
+      priority: e.priority,
+      id: e.id,
+      isUserEvent: true,
+    }));
+
+    return [...dated, ...weekly, ...userMapped];
+  }, [currentYear, currentMonth, userEvents]);
 
   const eventsByDate = useMemo(() => {
     const map: Record<string, CalendarEvent[]> = {};
@@ -379,13 +400,44 @@ export function Calendar({ onQuickAdd, selectedDate: controlledDate, onDateSelec
                           {evt.title}
                         </span>
                         {evt.time && (
-                          <span className="ml-auto font-mono text-[10px] text-inkDim">
+                          <span className="font-mono text-[10px] text-inkDim">
                             {evt.time}
                           </span>
+                        )}
+                        {evt.isUserEvent && (
+                          <div className="ml-auto flex gap-1">
+                            {onSaveEvent && (
+                              <button
+                                onClick={() => onSaveEvent({ id: evt.id!, date: evt.date, title: evt.title, type: evt.type as CalendarUserEvent["type"], time: evt.time, priority: evt.priority as CalendarUserEvent["priority"] })}
+                                className="rounded p-0.5 text-inkDim/40 hover:text-pastelBlue transition-colors"
+                                aria-label="Edit event"
+                              >
+                                <Pencil className="h-3 w-3" />
+                              </button>
+                            )}
+                            {onDeleteEvent && (
+                              <button
+                                onClick={() => onDeleteEvent(evt.id!)}
+                                className="rounded p-0.5 text-inkDim/40 hover:text-pink transition-colors"
+                                aria-label="Delete event"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </button>
+                            )}
+                          </div>
                         )}
                       </div>
                     );
                   })}
+                  {onAddEvent && (
+                    <button
+                      onClick={onAddEvent}
+                      className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl border border-pastelBlue/20 px-3 py-1.5 text-[12px] font-bold text-pastelBlue transition-colors hover:bg-pastelBlue/10"
+                    >
+                      <Plus className="h-3 w-3" />
+                      Add event
+                    </button>
+                  )}
                   {onQuickAdd && selectedEvents.some((e) => e.type === "Scrim" || e.type === "Official") && selectedDate! <= todayISO() && (
                     <button
                       onClick={() => onQuickAdd(selectedEvents.some((e) => e.type === "Official") ? "official" : "scrim")}
@@ -397,7 +449,18 @@ export function Calendar({ onQuickAdd, selectedDate: controlledDate, onDateSelec
                   )}
                 </div>
               ) : (
-                <div className="text-[12px] text-inkDim/80">No events scheduled</div>
+                <div className="space-y-2">
+                  <div className="text-[12px] text-inkDim/80">No events scheduled</div>
+                  {onAddEvent && (
+                    <button
+                      onClick={onAddEvent}
+                      className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-pastelBlue/20 px-3 py-1.5 text-[12px] font-bold text-pastelBlue transition-colors hover:bg-pastelBlue/10"
+                    >
+                      <Plus className="h-3 w-3" />
+                      Add event
+                    </button>
+                  )}
+                </div>
               )}
             </div>
           </motion.div>

@@ -18,27 +18,30 @@ const TYPE_CONFIG: Record<MatchType, { label: string; active: string }> = {
   personal: { label: "Personal", active: "border-pastelPeach bg-pastelPeach/10 text-orange-400" },
 };
 
-export function PostMatchPrompt({ onAdd, onClose, defaultType = "scrim", roster }: {
-  onAdd: (m: Omit<MatchEntry, "id" | "date">) => void;
+export function PostMatchPrompt({ onAdd, onSave, onClose, defaultType = "scrim", roster, editData }: {
+  onAdd?: (m: Omit<MatchEntry, "id" | "date">) => void;
+  onSave?: (m: MatchEntry) => void;
   onClose: () => void;
   defaultType?: MatchType;
   roster?: string[];
+  editData?: MatchEntry;
 }) {
-  const [type, setType] = useState<MatchType>(defaultType);
-  const [opponent, setOpponent] = useState("");
-  const [map, setMap] = useState(MAP_OPTIONS[0].value);
-  const [result, setResult] = useState<"W" | "L" | "D">("W");
-  const [scoreFor, setScoreFor] = useState("");
-  const [scoreAgainst, setScoreAgainst] = useState("");
-  const [teamPlayers, setTeamPlayers] = useState(roster ? roster.join(", ") : "");
-  const [kd, setKd] = useState("");
-  const [adr, setAdr] = useState("");
-  const [hsPercent, setHsPercent] = useState("");
-  const [note, setNote] = useState("");
+  const isEdit = !!editData;
+  const [type, setType] = useState<MatchType>(editData?.type ?? defaultType);
+  const [opponent, setOpponent] = useState(editData?.opponent ?? "");
+  const [map, setMap] = useState(editData?.map ?? MAP_OPTIONS[0].value);
+  const [result, setResult] = useState<"W" | "L" | "D">(editData?.result ?? "W");
+  const [scoreFor, setScoreFor] = useState(editData?.scoreFor != null ? String(editData.scoreFor) : "");
+  const [scoreAgainst, setScoreAgainst] = useState(editData?.scoreAgainst != null ? String(editData.scoreAgainst) : "");
+  const [teamPlayers, setTeamPlayers] = useState(editData?.teamPlayers?.join(", ") ?? (roster ? roster.join(", ") : ""));
+  const [kd, setKd] = useState(editData?.kd != null ? String(editData.kd) : "");
+  const [adr, setAdr] = useState(editData?.adr != null ? String(editData.adr) : "");
+  const [hsPercent, setHsPercent] = useState(editData?.hsPercent != null ? String(editData.hsPercent) : "");
+  const [note, setNote] = useState(editData?.note ?? "");
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    onAdd({
+    const data = {
       type,
       opponent: opponent.trim() || (type === "personal" ? "Premier / MM" : "TBD"),
       map,
@@ -50,17 +53,22 @@ export function PostMatchPrompt({ onAdd, onClose, defaultType = "scrim", roster 
       adr: Number(adr) || 0,
       hsPercent: Number(hsPercent) || 0,
       note: note.trim() || undefined,
-    });
+    };
+    if (isEdit && onSave && editData) {
+      onSave({ ...editData, ...data });
+    } else if (onAdd) {
+      onAdd(data);
+    }
     onClose();
   }
 
   return (
-    <AccessibleModal open onClose={onClose} label="Log Match Result" className="w-full max-w-md max-h-[85vh] overflow-y-auto rounded-3xl border border-pastelPink/20 bg-[rgba(25,22,40,0.95)] p-5 shadow-pastel-lg">
+    <AccessibleModal open onClose={onClose} label={isEdit ? "Edit Match" : "Log Match Result"} className="w-full max-w-md max-h-[85vh] overflow-y-auto rounded-3xl border border-pastelPink/20 bg-[rgba(25,22,40,0.95)] p-5 shadow-pastel-lg">
       <form onSubmit={handleSubmit}>
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Swords className="h-4 w-4 text-pastelLavender" />
-            <h3 className="font-display text-lg font-bold text-ink">Log Match Result</h3>
+            <h3 className="font-display text-lg font-bold text-ink">{isEdit ? "Edit Match" : "Log Match Result"}</h3>
           </div>
           <button type="button" onClick={onClose} aria-label="Close match log" className="rounded-full p-1 text-inkDim hover:bg-pastelPink/10 hover:text-pink">
             <X className="h-4 w-4" />
@@ -155,7 +163,7 @@ export function PostMatchPrompt({ onAdd, onClose, defaultType = "scrim", roster 
         </label>
 
         <button type="submit" className="w-full rounded-full bg-gradient-to-r from-pastelPink via-pastelLavender to-pastelBlue py-2.5 font-display text-sm font-bold text-white shadow-pastel transition-all hover:-translate-y-0.5 hover:shadow-pastel-lg">
-          Log Match
+          {isEdit ? "Save Changes" : "Log Match"}
         </button>
       </form>
     </AccessibleModal>
