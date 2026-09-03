@@ -1,4 +1,4 @@
-export function Sparkline({ data, color = "#FFB6D9", height = 32, width = 80 }: {
+export function Sparkline({ data, color = "#FF8AC0", height = 32, width = 80 }: {
   data: number[];
   color?: string;
   height?: number;

@@ -66,6 +66,21 @@ export type PracticeTimerState = {
   lastTick: number | null;
 };
 
+export type RuleHistoryEntry = {
+  date: string;
+  day: string;
+  checked: string[];
+};
+
+export type LineupNote = {
+  id: string;
+  map: string;
+  title: string;
+  note: string;
+  image?: string;
+  createdAt: string;
+};
+
 export type ReadyUpState = {
   streak: number;
   lastDate: string | null;
@@ -87,6 +102,8 @@ export type ReadyUpState = {
   calendarDate: string | null;
   dailyRules: { date: string; checked: string[] };
   practiceTimer: PracticeTimerState;
+  ruleHistory: RuleHistoryEntry[];
+  lineups: LineupNote[];
 };
 
 export interface ReadyUpAPI {

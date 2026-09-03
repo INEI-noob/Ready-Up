@@ -11,7 +11,7 @@ const Checkbox = React.forwardRef<
     ref={ref}
     className={cn(
       "peer h-6 w-6 shrink-0 rounded-full border-2 border-pastelPink/40 transition-all duration-300",
-      "hover:border-pastelPink hover:shadow-[0_0_8px_rgba(255,182,217,0.3)]",
+      "hover:border-pastelPink hover:shadow-[0_0_8px_rgba(255,138,192,0.35)]",
       "data-[state=checked]:bg-gradient-to-br data-[state=checked]:from-pastelPink data-[state=checked]:to-pastelLavender data-[state=checked]:border-transparent data-[state=checked]:shadow-pastel",
       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pastelPink focus-visible:ring-offset-2 focus-visible:ring-offset-white",
       className

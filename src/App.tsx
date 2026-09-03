@@ -21,6 +21,9 @@ import { PracticeTimer } from "@/components/PracticeTimer";
 import { MatchStreak } from "@/components/MatchStreak";
 import { TeamHeatmap } from "@/components/TeamHeatmap";
 import { CommunityServers } from "@/components/CommunityServers";
+import { RuleTrends } from "@/components/RuleTrends";
+import { WeeklyRecap } from "@/components/WeeklyRecap";
+import { LineupNotebook } from "@/components/LineupNotebook";
 import { ToastProvider, useToast } from "@/components/Toast";
 import { useReadyUpState } from "@/hooks/useReadyUpState";
 import { ROUTINE, FALLBACK_FOCUS, RULES } from "@/data/routine";
@@ -88,9 +91,9 @@ function ProgressRing({ checked, total }: { checked: number; total: number }) {
   return (
     <div className="relative h-12 w-12">
       <svg className="h-12 w-12 -rotate-90" viewBox="0 0 44 44">
-        <circle cx="22" cy="22" r="20" fill="none" stroke="rgba(255,182,217,0.15)" strokeWidth="3" />
+        <circle cx="22" cy="22" r="20" fill="none" stroke="rgba(255,138,192,0.15)" strokeWidth="3" />
         <motion.circle cx="22" cy="22" r="20" fill="none" stroke="url(#progressGradient)" strokeWidth="3" strokeLinecap="round" strokeDasharray={circumference} initial={{ strokeDashoffset: circumference }} animate={{ strokeDashoffset: offset }} transition={{ duration: 0.5, ease: "easeOut" }} />
-        <defs><linearGradient id="progressGradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#FFB6D9" /><stop offset="1" stopColor="#D4A5FF" /></linearGradient></defs>
+        <defs><linearGradient id="progressGradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#FF8AC0" /><stop offset="1" stopColor="#8B85F5" /></linearGradient></defs>
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">
         <span className="font-display text-xs font-bold text-pastelPink">{checked}/{total}</span>
@@ -105,7 +108,7 @@ function ReadyUpApp() {
   const focus = ROUTINE[dayName] ?? FALLBACK_FOCUS;
   const dateLabel = useMemo(() => `${dayName.toUpperCase()} \u00B7 ${now.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`, [dayName, now]);
 
-  const { state, loaded, commitToday, addSession, addMatch, deleteMatch, setTeamRoster, setOnboardingComplete, saveRuleTemplate, deleteRuleTemplate, archiveOldSessions, setViewMode, saveLaunchProfile, deleteLaunchProfile, setActiveProfile, setAchievements, setSoundId, saveServer, deleteServer, exportData, importData, setSidebarTab, setCalendarDate, setDailyRules, setPracticeTimer } = useReadyUpState();
+  const { state, loaded, commitToday, addSession, addMatch, deleteMatch, setTeamRoster, setOnboardingComplete, saveRuleTemplate, deleteRuleTemplate, archiveOldSessions, setViewMode, saveLaunchProfile, deleteLaunchProfile, setActiveProfile, setAchievements, setSoundId, saveServer, deleteServer, exportData, importData, setSidebarTab, setCalendarDate, setDailyRules, setPracticeTimer, saveLineup, deleteLineup } = useReadyUpState();
   const [checked, setChecked] = useState<Set<string>>(new Set());
   const [launching, setLaunching] = useState(false);
   const [confetti, setConfetti] = useState(false);
@@ -173,7 +176,7 @@ function ReadyUpApp() {
         }
       }
     }
-  }, [loaded, state.sessions, state.matches, state.streak, state.teamRoster]);
+  }, [loaded, state.sessions, state.matches, state.streak, state.teamRoster, state.lineups]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -545,6 +548,11 @@ function ReadyUpApp() {
                       onDelete={(id) => { deleteLaunchProfile(id); toast("Profile deleted", "info"); }}
                       onActivate={(id) => { setActiveProfile(id); const profile = (state.launchProfiles || []).find((p) => p.id === id); if (profile) setChecked(new Set(profile.rules)); toast("Profile activated", "success"); }}
                     />
+                    <LineupNotebook
+                      lineups={state.lineups || []}
+                      onSave={(l) => { saveLineup(l); toast("Lineup saved", "success"); }}
+                      onDelete={(id) => { deleteLineup(id); toast("Lineup deleted", "info"); }}
+                    />
                     <SoundCustomization soundId={state.soundId || "chime"} onChange={setSoundId} />
                     <PracticeTimer timerState={state.practiceTimer} onTimerChange={setPracticeTimer} />
                   </div>
@@ -552,8 +560,10 @@ function ReadyUpApp() {
 
                 {sidebarTab === "progress" && (
                   <div className="space-y-4">
+                    <WeeklyRecap state={state} />
                     <Achievements achievements={state.achievements || []} />
                     <MatchStreak matches={state.matches || []} />
+                    <RuleTrends history={state.ruleHistory || []} />
                     <TeamHeatmap matches={state.matches || []} />
                   </div>
                 )}

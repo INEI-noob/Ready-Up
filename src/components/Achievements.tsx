@@ -18,6 +18,8 @@ import {
   Users,
   Gamepad2,
   ClipboardList,
+  Heart,
+  BookOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Achievement, ReadyUpState } from "@/vite-env";
@@ -40,6 +42,8 @@ const ACHIEVEMENT_ICONS: Record<string, React.ComponentType<{ className?: string
   roster_set: Users,
   profile_created: Gamepad2,
   template_saved: ClipboardList,
+  comeback_kid: Heart,
+  lineup_master: BookOpen,
 };
 
 export const ACHIEVEMENT_DEFS: Omit<Achievement, "unlockedAt">[] = [
@@ -60,6 +64,8 @@ export const ACHIEVEMENT_DEFS: Omit<Achievement, "unlockedAt">[] = [
   { id: "roster_set", name: "Team Player", desc: "Save a full roster of 5+", icon: "" },
   { id: "profile_created", name: "Strategist", desc: "Create a launch profile", icon: "" },
   { id: "template_saved", name: "Organized", desc: "Save a rule template", icon: "" },
+  { id: "comeback_kid", name: "Comeback Kid", desc: "Win right after a 3+ loss streak", icon: "" },
+  { id: "lineup_master", name: "Lineup Master", desc: "Save 5 utility lineups", icon: "" },
 ];
 
 function checkAchievements(state: ReadyUpState): Achievement[] {
@@ -99,6 +105,26 @@ function checkAchievements(state: ReadyUpState): Achievement[] {
   if ((state.teamRoster || []).length >= 5) tryUnlock("roster_set");
   if ((state.launchProfiles || []).length >= 1) tryUnlock("profile_created");
   if ((state.ruleTemplates || []).length >= 1) tryUnlock("template_saved");
+  if ((state.lineups || []).length >= 5) tryUnlock("lineup_master");
+
+  if (matches.length >= 4) {
+    let lossStreak = 0;
+    let comeback = false;
+    for (const m of matches) {
+      if (m.result === "L") {
+        lossStreak++;
+      } else if (m.result === "W") {
+        if (lossStreak >= 3) {
+          comeback = true;
+          break;
+        }
+        lossStreak = 0;
+      } else {
+        lossStreak = 0;
+      }
+    }
+    if (comeback) tryUnlock("comeback_kid");
+  }
 
   return unlocked;
 }

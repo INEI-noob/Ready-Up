@@ -1,7 +1,10 @@
 import { useMemo } from "react";
-import { Flame, TrendingUp, TrendingDown } from "lucide-react";
+import { motion } from "framer-motion";
+import { Flame, TrendingUp, TrendingDown, Coffee } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { MatchEntry } from "@/vite-env";
+
+const TILT_THRESHOLD = 3;
 
 export function MatchStreak({ matches }: { matches: MatchEntry[] }) {
   const stats = useMemo(() => {
@@ -104,6 +107,18 @@ export function MatchStreak({ matches }: { matches: MatchEntry[] }) {
         </div>
       ) : (
         <div className="space-y-1.5">
+          {stats.all.currentL >= TILT_THRESHOLD && (
+            <motion.div
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-center gap-2 rounded-xl border border-pastelPeach/30 bg-pastelPeach/10 px-3 py-2"
+            >
+              <Coffee className="h-4 w-4 shrink-0 text-pastelPeach" />
+              <div className="text-[11px] text-inkSoft">
+                <strong className="text-ink">{stats.all.currentL} losses in a row.</strong> Your own routine says stop if tilted &mdash; maybe take a break before the next queue.
+              </div>
+            </motion.div>
+          )}
           <StreakCard label="ALL MATCHES" current={stats.all} best={{ bestW: stats.all.bestW, bestL: stats.all.bestL }} wins={allWins} losses={allLosses} />
           {teamWins + teamLosses > 0 && (
             <StreakCard label="TEAM" current={stats.team} best={{ bestW: stats.team.bestW, bestL: stats.team.bestL }} wins={teamWins} losses={teamLosses} />

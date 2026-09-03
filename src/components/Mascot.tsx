@@ -56,29 +56,29 @@ export function Mascot({ checkedCount }: { checkedCount: number }) {
           >
             <defs>
               <linearGradient id="mascotGradient" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stopColor="#FFB8D9" />
-                <stop offset="0.5" stopColor="#C9A0DC" />
-                <stop offset="1" stopColor="#7EC8E3" />
+                <stop offset="0" stopColor="#FF8AC0" />
+                <stop offset="0.5" stopColor="#8B85F5" />
+                <stop offset="1" stopColor="#5FBBFA" />
               </linearGradient>
             </defs>
             {/* Body */}
-            <ellipse cx="50" cy="58" rx="34" ry="30" fill="#FFB8D9" />
+            <ellipse cx="50" cy="58" rx="34" ry="30" fill="#FF8AC0" />
             <ellipse cx="50" cy="58" rx="34" ry="30" fill="url(#mascotGradient)" opacity="0.6" />
             {/* Ears */}
             <motion.ellipse
-              cx="24" cy="52" rx="6" ry="9" fill="#FFB6D9"
+              cx="24" cy="52" rx="6" ry="9" fill="#FF8AC0"
               animate={isLocked ? { rotate: [0, -8, 0] } : {}}
               transition={{ duration: 0.6, repeat: isLocked ? Infinity : 0, repeatDelay: 2 }}
               style={{ transformOrigin: "24px 52px" }}
             />
             <motion.ellipse
-              cx="76" cy="52" rx="6" ry="9" fill="#FFB6D9"
+              cx="76" cy="52" rx="6" ry="9" fill="#FF8AC0"
               animate={isLocked ? { rotate: [0, 8, 0] } : {}}
               transition={{ duration: 0.6, repeat: isLocked ? Infinity : 0, repeatDelay: 2, delay: 0.1 }}
               style={{ transformOrigin: "76px 52px" }}
             />
-            <ellipse cx="24" cy="52" rx="3.5" ry="6" fill="#FFD4E8" opacity="0.6" />
-            <ellipse cx="76" cy="52" rx="3.5" ry="6" fill="#FFD4E8" opacity="0.6" />
+            <ellipse cx="24" cy="52" rx="3.5" ry="6" fill="#FFC2E0" opacity="0.6" />
+            <ellipse cx="76" cy="52" rx="3.5" ry="6" fill="#FFC2E0" opacity="0.6" />
             {/* Eyes */}
             <circle cx="38" cy="55" r="5" fill="#4A3B5C" />
             <circle cx="62" cy="55" r="5" fill="#4A3B5C" />
@@ -113,12 +113,12 @@ export function Mascot({ checkedCount }: { checkedCount: number }) {
             />
             {/* Blush */}
             <motion.circle
-              cx="28" cy="65" r="5" fill="#FFD4E8"
+              cx="28" cy="65" r="5" fill="#FFC2E0"
               animate={isLocked ? { opacity: [0.6, 0.9, 0.6] } : { opacity: 0.6 }}
               transition={{ duration: 2, repeat: Infinity }}
             />
             <motion.circle
-              cx="72" cy="65" r="5" fill="#FFD4E8"
+              cx="72" cy="65" r="5" fill="#FFC2E0"
               animate={isLocked ? { opacity: [0.6, 0.9, 0.6] } : { opacity: 0.6 }}
               transition={{ duration: 2, repeat: Infinity, delay: 0.3 }}
             />

@@ -36,7 +36,7 @@ export function RuleCard({
             "relative z-10 flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 transition-all duration-300 focus-visible:ring-2 focus-visible:ring-pastelPink focus-visible:ring-offset-2",
             checked
               ? "border-transparent bg-gradient-to-br from-pastelPink to-pastelLavender shadow-pastel"
-              : "border-pastelPink/30 bg-[rgba(25,22,40,0.5)] hover:border-pastelPink hover:shadow-[0_0_12px_rgba(255,182,217,0.25)]"
+              : "border-pastelPink/30 bg-[rgba(25,22,40,0.5)] hover:border-pastelPink hover:shadow-[0_0_12px_rgba(255,138,192,0.25)]"
           )}
         >
           {checked ? (

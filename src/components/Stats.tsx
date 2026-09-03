@@ -131,17 +131,28 @@ function Overview({ state }: { state: ReadyUpState }) {
   })();
 
   const mapStats = (() => {
-    const stats: Record<string, { wins: number; losses: number; total: number }> = {};
+    const stats: Record<string, { wins: number; losses: number; total: number; kdSum: number; adrSum: number }> = {};
     for (const m of allMatches) {
-      if (!stats[m.map]) stats[m.map] = { wins: 0, losses: 0, total: 0 };
+      if (!stats[m.map]) stats[m.map] = { wins: 0, losses: 0, total: 0, kdSum: 0, adrSum: 0 };
       stats[m.map].total++;
+      stats[m.map].kdSum += m.kd ?? 0;
+      stats[m.map].adrSum += m.adr ?? 0;
       if (m.result === "W") stats[m.map].wins++;
       else if (m.result === "L") stats[m.map].losses++;
     }
     return Object.entries(stats)
-      .map(([map, s]) => ({ map, ...s, winRate: s.total > 0 ? (s.wins / s.total) * 100 : 0 }))
+      .map(([map, s]) => ({
+        map,
+        ...s,
+        winRate: s.total > 0 ? (s.wins / s.total) * 100 : 0,
+        avgKd: s.total > 0 ? s.kdSum / s.total : 0,
+        avgAdr: s.total > 0 ? s.adrSum / s.total : 0,
+      }))
       .sort((a, b) => b.total - a.total);
   })();
+
+  const bestMap = mapStats.filter((m) => m.wins > 0).sort((a, b) => b.winRate - a.winRate)[0];
+  const toughestMap = mapStats.filter((m) => m.losses > 0).sort((a, b) => b.losses - a.losses || a.winRate - b.winRate)[0];
 
   const dayStats = (() => {
     const stats: Record<string, { kd: number; adr: number; count: number }> = {};
@@ -179,11 +190,11 @@ function Overview({ state }: { state: ReadyUpState }) {
         <div className="flex gap-2">
           <div className="flex-1 rounded-xl border border-white/10 bg-white/5 p-2.5">
             <div className="mb-1 font-mono text-[10px] tracking-wider text-inkDim">K/D TREND</div>
-            <Sparkline data={kdTrend} color="#FFB6D9" />
+            <Sparkline data={kdTrend} color="#FF8AC0" />
           </div>
           <div className="flex-1 rounded-xl border border-white/10 bg-white/5 p-2.5">
             <div className="mb-1 font-mono text-[10px] tracking-wider text-inkDim">ADR TREND</div>
-            <Sparkline data={adrTrend} color="#A8D8EA" />
+            <Sparkline data={adrTrend} color="#7FCBF5" />
           </div>
         </div>
       )}
@@ -224,18 +235,31 @@ function Overview({ state }: { state: ReadyUpState }) {
 
       {mapStats.length > 0 && (
         <div className="rounded-xl border border-white/10 bg-white/5 p-3">
-          <div className="mb-2 font-mono text-[10px] tracking-wider text-inkDim">MAP WIN RATES</div>
-          <div className="space-y-1.5">
-            {mapStats.map(({ map, wins, losses, total, winRate }) => (
-              <div key={map} className="flex items-center gap-2">
-                <div className="w-16 text-[11px] font-bold text-ink">{MAP_DISPLAY[map] || map}</div>
-                <div className="flex-1">
-                  <div className="h-1.5 overflow-hidden rounded-full bg-pastelPink/10">
-                    <div className="h-full rounded-full bg-gradient-to-r from-pastelPink to-pastelLavender transition-all" style={{ width: `${winRate}%` }} />
+          <div className="mb-2 flex items-center justify-between">
+            <span className="font-mono text-[10px] tracking-wider text-inkDim">MAP PERFORMANCE</span>
+            {(bestMap || toughestMap) && (
+              <div className="flex gap-1">
+                {bestMap && <span className="rounded-full bg-pastelMint/15 px-1.5 py-0.5 font-mono text-[9px] text-okDark">best: {MAP_DISPLAY[bestMap.map] || bestMap.map}</span>}
+                {toughestMap && <span className="rounded-full bg-pastelPink/15 px-1.5 py-0.5 font-mono text-[9px] text-pink">tough: {MAP_DISPLAY[toughestMap.map] || toughestMap.map}</span>}
+              </div>
+            )}
+          </div>
+          <div className="space-y-2">
+            {mapStats.map(({ map, wins, losses, total, winRate, avgKd, avgAdr }) => (
+              <div key={map}>
+                <div className="flex items-center gap-2">
+                  <div className="w-16 text-[11px] font-bold text-ink">{MAP_DISPLAY[map] || map}</div>
+                  <div className="flex-1">
+                    <div className="h-1.5 overflow-hidden rounded-full bg-pastelPink/10">
+                      <div className="h-full rounded-full bg-gradient-to-r from-pastelPink to-pastelLavender transition-all" style={{ width: `${winRate}%` }} />
+                    </div>
+                  </div>
+                  <div className="w-20 text-right font-mono text-[10px] text-inkDim">
+                    {wins}W {losses}L <span className="text-inkSoft">({total})</span>
                   </div>
                 </div>
-                <div className="w-20 text-right font-mono text-[10px] text-inkDim">
-                  {wins}W {losses}L <span className="text-inkSoft">({total})</span>
+                <div className="ml-[72px] mt-0.5 font-mono text-[9px] text-inkDim/70">
+                  avg K/D <strong className="text-inkSoft">{avgKd.toFixed(2)}</strong> &middot; avg ADR <strong className="text-inkSoft">{avgAdr.toFixed(1)}</strong>
                 </div>
               </div>
             ))}

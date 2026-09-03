@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useMemo } from "react";
 
-const COLORS = ["#FFB6D9", "#A8D8EA", "#D4A5FF", "#B8E6C8", "#FFD4B8", "#FFF3B0"];
+const COLORS = ["#FF8AC0", "#7FCBF5", "#8B85F5", "#B8E6C8", "#FFD4B8", "#FFF3B0"];
 
 type Piece = { id: number; left: number; size: number; color: string; delay: number; duration: number };
 

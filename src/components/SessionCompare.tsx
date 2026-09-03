@@ -123,11 +123,11 @@ export function SessionCompare({ sessions }: { sessions: SessionEntry[] }) {
         <div className="flex gap-2">
           <div className="flex-1 rounded-xl border border-white/10 bg-white/5 p-2">
             <div className="mb-0.5 font-mono text-[9px] tracking-wider text-inkDim">K/D TREND</div>
-            <Sparkline data={kdTrend} color="#FFB6D9" height={24} />
+            <Sparkline data={kdTrend} color="#FF8AC0" height={24} />
           </div>
           <div className="flex-1 rounded-xl border border-white/10 bg-white/5 p-2">
             <div className="mb-0.5 font-mono text-[9px] tracking-wider text-inkDim">ADR TREND</div>
-            <Sparkline data={adrTrend} color="#A8D8EA" height={24} />
+            <Sparkline data={adrTrend} color="#7FCBF5" height={24} />
           </div>
         </div>
       )}

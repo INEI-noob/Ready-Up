@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import type { ReadyUpState, SessionEntry, MatchEntry, RuleTemplate, LaunchProfile, Achievement, SoundId, CommunityServer, PracticeTimerState } from "@/vite-env";
+import type { ReadyUpState, SessionEntry, MatchEntry, RuleTemplate, LaunchProfile, Achievement, SoundId, CommunityServer, PracticeTimerState, LineupNote } from "@/vite-env";
 
 const LS_KEY = "cs2-readyup-state";
 const DEFAULT_STATE: ReadyUpState = {
@@ -23,6 +23,8 @@ const DEFAULT_STATE: ReadyUpState = {
   calendarDate: null,
   dailyRules: { date: "", checked: [] },
   practiceTimer: { phase: 0, remaining: 300, running: false, customDurations: {}, lastTick: null },
+  ruleHistory: [],
+  lineups: [],
 };
 
 async function readState(): Promise<ReadyUpState> {
@@ -48,6 +50,8 @@ async function readState(): Promise<ReadyUpState> {
       calendarDate: parsed.calendarDate ?? null,
       dailyRules: parsed.dailyRules ?? { date: "", checked: [] },
       practiceTimer: parsed.practiceTimer ?? { phase: 0, remaining: 300, running: false, customDurations: {}, lastTick: null },
+      ruleHistory: parsed.ruleHistory ?? [],
+      lineups: parsed.lineups ?? [],
     };
   } catch {
     return DEFAULT_STATE;
@@ -108,12 +112,17 @@ export function useReadyUpState() {
       ruleStats[key] = (ruleStats[key] || 0) + 1;
     }
 
+    // Log today's checked rules for trend tracking, replacing any earlier commit from today
+    const historyWithoutToday = (current.ruleHistory || []).filter((h) => h.date !== today);
+    const ruleHistory = [...historyWithoutToday, { date: today, day: dayName, checked: checkedRules }].slice(-60);
+
     const next: ReadyUpState = {
       ...current,
       streak,
       lastDate: today,
       log: [...(current.log || []), { date: new Date().toISOString(), day: dayName }].slice(-49),
       ruleStats,
+      ruleHistory,
     };
 
     await writeState(next);
@@ -277,6 +286,21 @@ export function useReadyUpState() {
     setState(next);
   }, []);
 
+  const saveLineup = useCallback(async (lineup: LineupNote) => {
+    const current = await readState();
+    const existing = (current.lineups || []).filter((l) => l.id !== lineup.id);
+    const next: ReadyUpState = { ...current, lineups: [...existing, lineup].slice(-300) };
+    await writeState(next);
+    setState(next);
+  }, []);
+
+  const deleteLineup = useCallback(async (id: string) => {
+    const current = await readState();
+    const next: ReadyUpState = { ...current, lineups: (current.lineups || []).filter((l) => l.id !== id) };
+    await writeState(next);
+    setState(next);
+  }, []);
+
   const exportData = useCallback(async (): Promise<string> => {
     const current = await readState();
     return JSON.stringify(current, null, 2);
@@ -296,6 +320,8 @@ export function useReadyUpState() {
       launchProfiles: parsed.launchProfiles ?? [],
       achievements: parsed.achievements ?? [],
       servers: parsed.servers ?? [],
+      ruleHistory: parsed.ruleHistory ?? [],
+      lineups: parsed.lineups ?? [],
     };
     await writeState(next);
     setState(next);
@@ -334,5 +360,6 @@ export function useReadyUpState() {
     setViewMode, saveLaunchProfile, deleteLaunchProfile, setActiveProfile,
     setAchievements, setSoundId, saveServer, deleteServer, exportData, importData,
     setSidebarTab, setCalendarDate, setDailyRules, setPracticeTimer,
+    saveLineup, deleteLineup,
   };
 }

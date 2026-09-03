@@ -98,7 +98,7 @@ export function AddSession({ onAdd, onClose, rulesChecked }: {
             onChange={(e) => setMindsetNote(e.target.value)}
             rows={2}
             placeholder="What's your mindset going into this session?"
-            className="w-full resize-none rounded-xl border border-pastelPink/20 bg-[rgba(255,184,217,0.05)] px-3 py-1.5 text-[13px] text-ink outline-none placeholder:text-pastelPink/40 focus:border-pastelPink/40 focus:ring-2 focus:ring-pastelPink/20"
+            className="w-full resize-none rounded-xl border border-pastelPink/20 bg-[rgba(255,138,192,0.05)] px-3 py-1.5 text-[13px] text-ink outline-none placeholder:text-pastelPink/40 focus:border-pastelPink/40 focus:ring-2 focus:ring-pastelPink/20"
           />
         </label>
 

@@ -96,7 +96,7 @@ export function MiniDashboard({ state, checkedCount, onExpand }: {
       {kdTrend.length >= 2 && (
         <div className="mt-2 rounded-xl border border-white/30 bg-white/30 px-2 py-1.5">
           <div className="mb-0.5 font-mono text-[9px] tracking-wider text-inkDim">K/D TREND</div>
-          <Sparkline data={kdTrend} color="#FFB6D9" height={20} />
+          <Sparkline data={kdTrend} color="#FF8AC0" height={20} />
         </div>
       )}
     </motion.div>
