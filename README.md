@@ -1,6 +1,6 @@
 # Ready Up
 
-![Version](https://img.shields.io/badge/version-1.0.0-pink)
+![Version](https://img.shields.io/badge/version-1.1.3-pink)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Stack](https://img.shields.io/badge/stack-React%20%2B%20Vite%20%2B%20Tailwind-8B85F5)
 
