@@ -286,7 +286,7 @@ function Overview({ state }: { state: ReadyUpState }) {
 
       {sortedRules.length > 0 && (
         <div className="rounded-xl border border-white/10 bg-white/5 p-3">
-          <div className="mb-2 font-mono text-[10px] tracking-wider text-inkDim">RULES CHECKED</div>
+          <div className="mb-2 font-mono text-[10px] tracking-wider text-inkDim">FOCUS POINTS CHECKED</div>
           <div className="space-y-1">
             {sortedRules.map(([key, count]) => (
               <div key={key} className="flex items-center justify-between">

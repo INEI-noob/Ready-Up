@@ -1,10 +1,11 @@
 import { useMemo, useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Flame, Sparkles, Calendar, PenLine, Minimize2, Maximize2, CalendarDays, BarChart3, Wrench, Trophy } from "lucide-react";
+import { Flame, Sparkles, Calendar, PenLine, Minimize2, Maximize2, CalendarDays, BarChart3, Wrench, Trophy, Pencil, X } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Mascot } from "@/components/Mascot";
-import { RuleCard } from "@/components/RuleCard";
+import { FocusPointCard } from "@/components/FocusPointCard";
+import { FocusPointEditor } from "@/components/FocusPointEditor";
 import { Confetti } from "@/components/Confetti";
 import { Calendar as CalendarView } from "@/components/Calendar";
 import { Stats } from "@/components/Stats";
@@ -26,7 +27,8 @@ import { WeeklyRecap } from "@/components/WeeklyRecap";
 import { LineupNotebook } from "@/components/LineupNotebook";
 import { ToastProvider, useToast } from "@/components/Toast";
 import { useReadyUpState } from "@/hooks/useReadyUpState";
-import { ROUTINE, FALLBACK_FOCUS, RULES } from "@/data/routine";
+import { ROUTINE, FALLBACK_FOCUS, FOCUS_POINTS_DEFAULT, getTodayWarmupItems } from "@/data/routine";
+import type { FocusPoint } from "@/data/routine";
 import { cn } from "@/lib/utils";
 import type { SoundId } from "@/vite-env";
 
@@ -84,24 +86,6 @@ function FloatingDecorations() {
   );
 }
 
-function ProgressRing({ checked, total }: { checked: number; total: number }) {
-  const circumference = 2 * Math.PI * 20;
-  const offset = circumference - ((total > 0 ? checked / total : 0)) * circumference;
-
-  return (
-    <div className="relative h-12 w-12">
-      <svg className="h-12 w-12 -rotate-90" viewBox="0 0 44 44">
-        <circle cx="22" cy="22" r="20" fill="none" stroke="rgba(255,138,192,0.15)" strokeWidth="3" />
-        <motion.circle cx="22" cy="22" r="20" fill="none" stroke="url(#progressGradient)" strokeWidth="3" strokeLinecap="round" strokeDasharray={circumference} initial={{ strokeDashoffset: circumference }} animate={{ strokeDashoffset: offset }} transition={{ duration: 0.5, ease: "easeOut" }} />
-        <defs><linearGradient id="progressGradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#FF8AC0" /><stop offset="1" stopColor="#8B85F5" /></linearGradient></defs>
-      </svg>
-      <div className="absolute inset-0 flex items-center justify-center">
-        <span className="font-display text-xs font-bold text-pastelPink">{checked}/{total}</span>
-      </div>
-    </div>
-  );
-}
-
 function ReadyUpApp() {
   const now = useMemo(() => new Date(), []);
   const dayName = useMemo(() => now.toLocaleDateString("en-US", { weekday: "long" }), [now]);
@@ -119,9 +103,15 @@ function ReadyUpApp() {
   const [showRoster, setShowRoster] = useState(false);
   const [mindsetNote, setMindsetNote] = useState("");
   const [showMindset, setShowMindset] = useState(false);
-  const rulesRef = useRef<HTMLDivElement>(null);
+  const [showFocusEditor, setShowFocusEditor] = useState(false);
   const { toast } = useToast();
   const todayISO = useMemo(() => new Date().toISOString().slice(0, 10), []);
+
+  const todayWarmupItems = useMemo(() => getTodayWarmupItems(), []);
+  const allChecked = checked.size === todayWarmupItems.length;
+  const [focusPoints, setFocusPoints] = useState<FocusPoint[]>(FOCUS_POINTS_DEFAULT);
+  const showOnboarding = loaded && !state.onboardingComplete;
+  const sidebarTab = state.sidebarTab;
 
   // Load persisted daily rules for today
   useEffect(() => {
@@ -141,10 +131,6 @@ function ReadyUpApp() {
     return () => clearTimeout(persistTimer.current);
   }, [checked, loaded]);
 
-  const allChecked = checked.size === RULES.length;
-  const showOnboarding = loaded && !state.onboardingComplete;
-  const sidebarTab = state.sidebarTab;
-
   // Auto-archive old sessions on load
   const didArchive = useRef(false);
   useEffect(() => {
@@ -154,12 +140,12 @@ function ReadyUpApp() {
     }
   }, [loaded]);
 
-  // Play chime when all rules checked
+  // Play chime when all warmup items checked
   const prevAllChecked = useRef(false);
   useEffect(() => {
     if (allChecked && !prevAllChecked.current) {
       playSound(state.soundId);
-      toast("All rules locked in!", "success");
+      toast("All warmup items locked in!", "success");
     }
     prevAllChecked.current = allChecked;
   }, [allChecked, state.soundId]);
@@ -187,34 +173,29 @@ function ReadyUpApp() {
 
       if (e.code === "Space") {
         e.preventDefault();
-        if (allChecked && !launching) {
-          handleLaunch();
-        } else {
-          const unchecked = RULES.find((r) => !checked.has(r.key));
-          if (unchecked) toggleRule(unchecked.key);
-        }
+        handleLaunch();
       }
 
-      if (e.key >= "1" && e.key <= "4") {
+      if (e.key >= "1" && e.key <= "9") {
         const idx = Number(e.key) - 1;
-        if (idx < RULES.length) toggleRule(RULES[idx].key);
+        if (idx < todayWarmupItems.length) toggleWarmupItem(todayWarmupItems[idx].id);
       }
     }
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [allChecked, launching, checked]);
+  }, [launching, checked, todayWarmupItems]);
 
-  function toggleRule(key: string) {
+  function toggleWarmupItem(id: string) {
     setChecked((prev) => {
       const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
   }
 
   async function handleLaunch() {
-    if (!allChecked || launching) return;
+    if (launching) return;
     setLaunching(true);
     setConfetti(true);
     setTimeout(() => setConfetti(false), 2500);
@@ -314,6 +295,36 @@ function ReadyUpApp() {
               }}
             />
           </div>
+          <div className="rounded-3xl border border-pastelPink/20 bg-[rgba(25,22,40,0.75)] p-4 shadow-pastel backdrop-blur-sm">
+            <div className="mb-3 flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <Pencil className="h-3 w-3 text-pastelPink" />
+                <span className="font-mono text-[10px] tracking-wider text-inkDim">FOCUS POINTS</span>
+              </div>
+              <button
+                onClick={() => setShowFocusEditor(!showFocusEditor)}
+                className={cn(
+                  "flex items-center gap-1 rounded-lg px-1.5 py-0.5 text-[10px] font-bold transition-all",
+                  showFocusEditor ? "bg-pastelPink/20 text-pastelPink" : "text-inkDim/40 hover:text-pastelPink"
+                )}
+              >
+                {showFocusEditor ? <X className="h-2.5 w-2.5" /> : <Pencil className="h-2.5 w-2.5" />}
+                {showFocusEditor ? "Done" : "Edit"}
+              </button>
+            </div>
+            {showFocusEditor ? (
+              <FocusPointEditor
+                points={focusPoints}
+                onChange={setFocusPoints}
+              />
+            ) : (
+              <div className="space-y-1.5">
+                {focusPoints.map((point, i) => (
+                  <FocusPointCard key={point.id} point={point} checked={false} onToggle={() => {}} index={i} isLast={i === focusPoints.length - 1} />
+                ))}
+              </div>
+            )}
+          </div>
         </motion.div>
 
         {/* Center column — Main */}
@@ -358,6 +369,7 @@ function ReadyUpApp() {
             <MiniDashboard
               state={state}
               checkedCount={checked.size}
+              focusPointCount={todayWarmupItems.length}
               onExpand={() => setViewMode("full")}
             />
           ) : (
@@ -368,88 +380,65 @@ function ReadyUpApp() {
               <div className="pointer-events-none absolute -right-6 -top-6 h-28 w-28 rounded-full bg-pastelPink/15 blur-2xl" />
               <div className="pointer-events-none absolute -left-4 -bottom-4 h-20 w-20 rounded-full bg-pastelBlue/15 blur-2xl" />
               <CardContent>
-                <div className="mb-2 font-mono text-[11px] tracking-wider text-inkDim">TODAY'S FOCUS</div>
+                <div className="mb-2 font-mono text-[11px] tracking-wider text-inkDim">TODAY'S WARMUP</div>
                 <div className="mb-1.5 text-lg font-bold text-gradient-blue">{focus.title}</div>
                 <div className="text-[15px] leading-relaxed text-inkSoft">{focus.desc}</div>
               </CardContent>
             </Card>
           </motion.div>
 
-          {/* Rules */}
-          <motion.div ref={rulesRef} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4, duration: 0.5 }}>
+          {/* Warmup Checklist */}
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4, duration: 0.5 }}>
             <div className="mb-3 flex items-center justify-between">
-              <span className="font-mono text-[11.5px] tracking-wider text-inkDim">GOLDEN RULES</span>
-              <ProgressRing checked={checked.size} total={RULES.length} />
+              <span className="font-mono text-[11.5px] tracking-wider text-inkDim">WARMUP CHECKLIST</span>
+              <span className="font-mono text-[10.5px] text-inkDim/80">{checked.size}/{todayWarmupItems.length} done</span>
             </div>
-            <div className="mb-2 ml-1 font-mono text-[10.5px] text-inkDim/80">tap each one to lock it in &middot; press 1-4 or spacebar</div>
+            <div className="mb-2 ml-1 font-mono text-[10.5px] text-inkDim/80">tap each one to check it off &middot; press 1-{todayWarmupItems.length}</div>
             <div className="mt-2">
-              {RULES.map((rule, i) => (
-                <RuleCard key={rule.key} rule={rule} checked={checked.has(rule.key)} onToggle={() => toggleRule(rule.key)} index={i} isLast={i === RULES.length - 1} />
+              {todayWarmupItems.map((item, i) => (
+                <FocusPointCard key={item.id} point={item} checked={checked.has(item.id)} onToggle={() => toggleWarmupItem(item.id)} index={i} isLast={i === todayWarmupItems.length - 1} />
               ))}
             </div>
           </motion.div>
 
           {/* Launch */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6, duration: 0.5 }} className="mt-6">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={allChecked ? "ready" : "idle"}
-                initial={{ opacity: 0, y: -4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 4 }}
-                className="mb-3 min-h-[16px] min-w-[200px] text-center font-mono text-[13px] text-inkDim"
-              >
-                {allChecked ? "all rules locked in. go get 'em!" : `${checked.size} / ${RULES.length} rules locked in`}
-              </motion.div>
-            </AnimatePresence>
-
             {/* Mindset quick-note */}
-            <AnimatePresence>
-              {allChecked && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="mb-3 overflow-hidden"
-                >
-                  <div className="rounded-3xl border border-pastelPink/15 bg-pastelPink/5 p-3">
-                    <div className="mb-1.5 flex items-center justify-between">
-                      <div className="flex items-center gap-1.5">
-                        <PenLine className="h-3 w-3 text-pastelPink" />
-                        <span className="font-mono text-[10px] tracking-wider text-inkDim">PRE-GAME MINDSET</span>
-                      </div>
-                      <button onClick={() => setShowMindset(!showMindset)} className="rounded-lg p-1 font-mono text-[10px] text-pastelPink transition-colors duration-200 hover:text-pink active:scale-95">
-                        {showMindset ? "hide" : "add note"}
-                      </button>
-                    </div>
-                    <AnimatePresence>
-                      {showMindset && (
-                        <motion.div initial={{ height: 0 }} animate={{ height: "auto" }} exit={{ height: 0 }} className="overflow-hidden">
-                          <textarea
-                            value={mindsetNote}
-                            onChange={(e) => setMindsetNote(e.target.value)}
-                            rows={2}
-                            placeholder="What's your mindset going in? e.g. stay calm, trade kills..."
-                            className="w-full resize-none rounded-xl border border-white/10 bg-[rgba(25,22,40,0.5)] px-3 py-1.5 text-[13px] text-ink outline-none placeholder:text-pastelPink/40 focus:border-pastelPink/40 focus:ring-2 focus:ring-pastelPink/20"
-                          />
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+            <div className="mb-3">
+              <div className="rounded-3xl border border-pastelPink/15 bg-pastelPink/5 p-3">
+                <div className="mb-1.5 flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <PenLine className="h-3 w-3 text-pastelPink" />
+                    <span className="font-mono text-[10px] tracking-wider text-inkDim">PRE-GAME MINDSET</span>
                   </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                  <button onClick={() => setShowMindset(!showMindset)} className="rounded-lg p-1 font-mono text-[10px] text-pastelPink transition-colors duration-200 hover:text-pink active:scale-95">
+                    {showMindset ? "hide" : "add note"}
+                  </button>
+                </div>
+                <AnimatePresence>
+                  {showMindset && (
+                    <motion.div initial={{ height: 0 }} animate={{ height: "auto" }} exit={{ height: 0 }} className="overflow-hidden">
+                      <textarea
+                        value={mindsetNote}
+                        onChange={(e) => setMindsetNote(e.target.value)}
+                        rows={2}
+                        placeholder="What's your mindset going in? e.g. stay calm, trade kills..."
+                        className="w-full resize-none rounded-xl border border-white/10 bg-[rgba(25,22,40,0.5)] px-3 py-1.5 text-[13px] text-ink outline-none placeholder:text-pastelPink/40 focus:border-pastelPink/40 focus:ring-2 focus:ring-pastelPink/20"
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
 
-            <Button variant={allChecked ? "ready" : "idle"} size="lg" disabled={!allChecked || launching} onClick={handleLaunch}>
+            <Button variant="ready" size="lg" disabled={launching} onClick={handleLaunch}>
               {launching ? (
                 <span className="flex items-center gap-2">
                   <motion.span animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }} className="inline-block"><Sparkles className="h-5 w-5" /></motion.span>
                   LAUNCHING...
                 </span>
-              ) : allChecked ? (
-                <span className="flex items-center gap-2">READY UP &rarr; LAUNCH CS2</span>
               ) : (
-                "READY UP"
+                <span className="flex items-center gap-2">READY UP &rarr; LAUNCH CS2</span>
               )}
             </Button>
 

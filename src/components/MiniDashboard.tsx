@@ -1,12 +1,13 @@
 import { motion } from "framer-motion";
 import { Flame } from "lucide-react";
 import { Sparkline } from "@/components/Sparkline";
-import { ROUTINE, FALLBACK_FOCUS, RULES } from "@/data/routine";
+import { ROUTINE, FALLBACK_FOCUS } from "@/data/routine";
 import type { ReadyUpState } from "@/vite-env";
 
-export function MiniDashboard({ state, checkedCount, onExpand }: {
+export function MiniDashboard({ state, checkedCount, focusPointCount, onExpand }: {
   state: ReadyUpState;
   checkedCount: number;
+  focusPointCount: number;
   onExpand: () => void;
 }) {
   const dayName = new Date().toLocaleDateString("en-US", { weekday: "long" });
@@ -50,12 +51,12 @@ export function MiniDashboard({ state, checkedCount, onExpand }: {
         <div className="text-[13px] font-bold text-gradient-blue">{focus.title}</div>
       </div>
 
-      {/* Rules dots */}
+      {/* Focus points dots */}
       <div className="mb-3 flex items-center gap-2">
         <div className="flex gap-1.5">
-          {RULES.map((rule, i) => (
+          {Array.from({ length: focusPointCount }).map((_, i) => (
             <div
-              key={rule.key}
+              key={i}
               className={`h-3 w-3 rounded-full transition-all duration-300 ${
                 i < checkedCount
                   ? "bg-gradient-to-br from-pastelPink to-pastelLavender shadow-[0_0_6px_rgba(212,165,255,0.4)]"
@@ -64,12 +65,12 @@ export function MiniDashboard({ state, checkedCount, onExpand }: {
             />
           ))}
         </div>
-        <span className="font-mono text-[10px] text-inkDim">{checkedCount}/{RULES.length}</span>
+        <span className="font-mono text-[10px] text-inkDim">{checkedCount}/{focusPointCount}</span>
         <div className="ml-auto flex-1">
           <div className="h-1.5 overflow-hidden rounded-full bg-pastelPink/10">
             <motion.div
               className="h-full rounded-full bg-gradient-to-r from-pastelPink to-pastelLavender"
-              animate={{ width: `${(checkedCount / RULES.length) * 100}%` }}
+              animate={{ width: `${focusPointCount > 0 ? (checkedCount / focusPointCount) * 100 : 0}%` }}
               transition={{ duration: 0.4 }}
             />
           </div>

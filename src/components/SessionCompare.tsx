@@ -136,7 +136,7 @@ export function SessionCompare({ sessions }: { sessions: SessionEntry[] }) {
         <CompareRow label="K/D" thisWeek={thisAvg.kd} lastWeek={lastAvg.kd} />
         <CompareRow label="ADR" thisWeek={thisAvg.adr} lastWeek={lastAvg.adr} decimals={1} />
         <CompareRow label="HS%" thisWeek={thisAvg.hs} lastWeek={lastAvg.hs} decimals={0} />
-        <CompareRow label="RULES AVG" thisWeek={thisAvg.rules} lastWeek={lastAvg.rules} decimals={1} />
+        <CompareRow label="FOCUS POINTS AVG" thisWeek={thisAvg.rules} lastWeek={lastAvg.rules} decimals={1} />
       </div>
 
       <div className="flex gap-2">

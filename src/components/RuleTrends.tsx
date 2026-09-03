@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import { ListChecks } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { RULES } from "@/data/routine";
 import type { RuleHistoryEntry } from "@/vite-env";
 
 const DOT_COUNT = 14;
@@ -9,11 +8,17 @@ const DOT_COUNT = 14;
 export function RuleTrends({ history }: { history: RuleHistoryEntry[] }) {
   const rows = useMemo(() => {
     const recent = (history || []).slice(-DOT_COUNT);
-    return RULES.map((rule) => {
-      const hits = recent.filter((h) => h.checked.includes(rule.key)).length;
+    // Collect all unique keys from history
+    const allKeys = new Set<string>();
+    for (const h of recent) {
+      for (const k of h.checked) allKeys.add(k);
+    }
+    const keys = Array.from(allKeys).sort();
+    return keys.map((key) => {
+      const hits = recent.filter((h) => h.checked.includes(key)).length;
       const rate = recent.length > 0 ? (hits / recent.length) * 100 : 0;
-      const dots = recent.map((h) => h.checked.includes(rule.key));
-      return { rule, rate, dots, tracked: recent.length };
+      const dots = recent.map((h) => h.checked.includes(key));
+      return { key, rate, dots, tracked: recent.length };
     });
   }, [history]);
 
@@ -23,7 +28,7 @@ export function RuleTrends({ history }: { history: RuleHistoryEntry[] }) {
     <div className="space-y-2">
       <div className="flex items-center gap-1.5">
         <ListChecks className="h-3 w-3 text-pastelLavender" />
-        <span className="font-mono text-[10px] tracking-wider text-inkDim">RULE ADHERENCE &middot; LAST {DOT_COUNT} DAYS</span>
+        <span className="font-mono text-[10px] tracking-wider text-inkDim">FOCUS ADHERENCE &middot; LAST {DOT_COUNT} DAYS</span>
       </div>
 
       {!hasData ? (
@@ -32,10 +37,10 @@ export function RuleTrends({ history }: { history: RuleHistoryEntry[] }) {
         </div>
       ) : (
         <div className="space-y-1.5">
-          {rows.map(({ rule, rate, dots, tracked }) => (
-            <div key={rule.key} className="rounded-xl border border-white/10 bg-white/5 p-2.5">
+          {rows.map(({ key, rate, dots, tracked }) => (
+            <div key={key} className="rounded-xl border border-white/10 bg-white/5 p-2.5">
               <div className="mb-1.5 flex items-center justify-between">
-                <span className="text-[12px] font-bold text-ink">{rule.title}</span>
+                <span className="text-[12px] font-bold text-ink capitalize">{key.replace(/-/g, " ")}</span>
                 <span
                   className={cn(
                     "font-mono text-[11px] font-bold",

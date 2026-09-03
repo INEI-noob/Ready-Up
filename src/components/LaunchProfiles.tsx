@@ -16,7 +16,6 @@ import {
   Swords,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { RULES } from "@/data/routine";
 import type { LaunchProfile } from "@/vite-env";
 
 const PROFILE_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -47,18 +46,8 @@ export function LaunchProfiles({
 }) {
   const [showCreate, setShowCreate] = useState(false);
   const [name, setName] = useState("");
-  const [selectedRules, setSelectedRules] = useState<Set<string>>(new Set(RULES.map((r) => r.key)));
   const [selectedIcon, setSelectedIcon] = useState(PROFILE_ICON_KEYS[0]);
   const [expanded, setExpanded] = useState<string | null>(null);
-
-  function toggleRule(key: string) {
-    setSelectedRules((prev) => {
-      const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
-      return next;
-    });
-  }
 
   function handleSave() {
     if (!name.trim()) return;
@@ -66,10 +55,9 @@ export function LaunchProfiles({
       id: crypto.randomUUID(),
       name: name.trim(),
       icon: selectedIcon,
-      rules: Array.from(selectedRules),
+      rules: [],
     });
     setName("");
-    setSelectedRules(new Set(RULES.map((r) => r.key)));
     setShowCreate(false);
   }
 
@@ -133,28 +121,6 @@ export function LaunchProfiles({
                   );
                 })}
               </div>
-
-              {/* Rule picker */}
-              <div className="space-y-1">
-                {RULES.map((rule) => (
-                  <button
-                    key={rule.key}
-                    onClick={() => toggleRule(rule.key)}
-                    className={cn(
-                      "flex w-full items-center gap-2 rounded-lg px-2 py-1 text-left text-[11px] transition-all",
-                      selectedRules.has(rule.key) ? "bg-pastelPink/10 text-ink" : "text-inkDim"
-                    )}
-                  >
-                    <div className={cn(
-                      "h-3.5 w-3.5 rounded border transition-all",
-                      selectedRules.has(rule.key) ? "border-pastelPink bg-pastelPink" : "border-inkDim/30"
-                    )}>
-                      {selectedRules.has(rule.key) && <Check className="h-3 w-3 text-white" />}
-                    </div>
-                    {rule.title}
-                  </button>
-                ))}
-              </div>
             </div>
           </motion.div>
         )}
@@ -173,7 +139,6 @@ export function LaunchProfiles({
                   <Icon className={cn("h-4 w-4", isActive ? "text-pastelPink" : "text-inkDim")} />
                   <div className="flex-1 min-w-0">
                     <div className="text-[12px] font-bold text-ink">{p.name}</div>
-                    <div className="font-mono text-[10px] text-inkDim">{p.rules.length} rules</div>
                   </div>
                   <button
                     onClick={() => onActivate(p.id)}
@@ -192,7 +157,6 @@ export function LaunchProfiles({
                   {isExpanded && (
                     <motion.div initial={{ height: 0 }} animate={{ height: "auto" }} exit={{ height: 0 }} className="overflow-hidden">
                       <div className="border-t border-white/10 px-3 py-2">
-                        <div className="mb-1 font-mono text-[10px] text-inkDim">RULES: {p.rules.map((r) => r.charAt(0).toUpperCase() + r.slice(1)).join(", ")}</div>
                         <button onClick={() => onDelete(p.id)} className="flex items-center gap-1 text-[10px] text-inkDim/40 hover:text-pink transition-colors">
                           <Trash2 className="h-2.5 w-2.5" /> Delete
                         </button>
@@ -206,7 +170,7 @@ export function LaunchProfiles({
         </div>
       ) : (
         <div className="rounded-xl border border-white/10 bg-white/5 p-3 text-center text-[11px] text-inkDim/70">
-          No profiles yet — create one to quick-switch rule sets
+          No profiles yet — create one to quick-switch settings
         </div>
       )}
     </div>

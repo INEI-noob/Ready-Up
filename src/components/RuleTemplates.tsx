@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bookmark, Plus, Trash2, Check } from "lucide-react";
-import { RULES } from "@/data/routine";
 import type { RuleTemplate } from "@/vite-env";
 
 export function RuleTemplates({
@@ -32,7 +31,7 @@ export function RuleTemplates({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5">
           <Bookmark className="h-3 w-3 text-pastelLavender" />
-          <span className="font-mono text-[10px] tracking-wider text-inkDim">RULE TEMPLATES</span>
+          <span className="font-mono text-[10px] tracking-wider text-inkDim">TEMPLATES</span>
         </div>
         <button
           onClick={() => setShowSave(!showSave)}
@@ -69,7 +68,7 @@ export function RuleTemplates({
               </button>
             </div>
             <div className="mt-1 text-[10px] text-inkDim/70">
-              Saves {currentChecked.size}/{RULES.length} checked rules
+              Saves {currentChecked.size} checked focus points
             </div>
           </motion.div>
         )}
@@ -86,7 +85,7 @@ export function RuleTemplates({
               <div className="flex-1 min-w-0">
                 <div className="text-[12px] font-bold text-ink">{t.name}</div>
                 <div className="font-mono text-[10px] text-inkDim">
-                  {t.rules.map((r) => r.charAt(0).toUpperCase() + r.slice(1)).join(", ")}
+                  {t.rules.length} focus points
                 </div>
               </div>
               <button

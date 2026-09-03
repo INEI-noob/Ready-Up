@@ -56,7 +56,7 @@ export const ACHIEVEMENT_DEFS: Omit<Achievement, "unlockedAt">[] = [
   { id: "sessions_50", name: "Dedicated", desc: "50 sessions logged", icon: "" },
   { id: "matches_10", name: "Competitor", desc: "10 matches logged", icon: "" },
   { id: "matches_50", name: "Veteran", desc: "50 matches logged", icon: "" },
-  { id: "all_rules", name: "Perfectionist", desc: "Check all 4 rules in a session", icon: "" },
+  { id: "all_rules", name: "Perfectionist", desc: "Check all focus points in a session", icon: "" },
   { id: "first_win", name: "Winner", desc: "Log your first win", icon: "" },
   { id: "win_streak_5", name: "Winning Streak", desc: "5 wins in a row", icon: "" },
   { id: "high_kd", name: "Sharpshooter", desc: "Log a session with K/D > 2.0", icon: "" },
@@ -90,7 +90,7 @@ function checkAchievements(state: ReadyUpState): Achievement[] {
   if (state.streak >= 7) tryUnlock("streak_7");
   if (state.streak >= 14) tryUnlock("streak_14");
   if (state.streak >= 30) tryUnlock("streak_30");
-  if (sessions.some((s) => s.rulesChecked >= 4)) tryUnlock("all_rules");
+  if (sessions.some((s) => s.rulesChecked >= 2)) tryUnlock("all_rules");
   if (matches.some((m) => m.result === "W")) tryUnlock("first_win");
   if (matches.length >= 5) {
     let streak = 0;

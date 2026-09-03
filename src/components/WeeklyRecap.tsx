@@ -42,9 +42,8 @@ export function WeeklyRecap({ state }: { state: ReadyUpState }) {
     const toughestMap = mapEntries.filter(([, s]) => s.losses > 0).sort((a, b) => b[1].losses - a[1].losses)[0];
 
     const weekHistory = (state.ruleHistory || []).filter((h) => daysAgo(h.date, cutoff));
-    const totalPossible = weekHistory.length * 4;
     const totalChecked = weekHistory.reduce((sum, h) => sum + h.checked.length, 0);
-    const adherence = totalPossible > 0 ? Math.round((totalChecked / totalPossible) * 100) : null;
+    const adherence = weekHistory.length > 0 ? Math.round((totalChecked / weekHistory.length) * 100) : null;
 
     return { sessions: sessions.length, matches: matches.length, wins, losses, draws, avgKd, bestMap, toughestMap, adherence };
   }, [state]);
@@ -83,7 +82,7 @@ export function WeeklyRecap({ state }: { state: ReadyUpState }) {
               <div className={cn("font-display text-lg font-bold", recap.adherence === null ? "text-inkDim" : recap.adherence >= 80 ? "text-okDark" : "text-ink")}>
                 {recap.adherence !== null ? `${recap.adherence}%` : "—"}
               </div>
-              <div className="font-mono text-[9px] tracking-wider text-inkDim">RULES KEPT</div>
+              <div className="font-mono text-[9px] tracking-wider text-inkDim">FOCUS POINTS KEPT</div>
             </div>
           </div>
 

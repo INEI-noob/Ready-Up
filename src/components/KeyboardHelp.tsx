@@ -3,8 +3,8 @@ import { HelpCircle } from "lucide-react";
 import { AccessibleModal } from "./AccessibleModal";
 
 const SHORTCUTS = [
-  { keys: "Space", desc: "Toggle / Launch" },
-  { keys: "1–4", desc: "Toggle rules" },
+  { keys: "Space", desc: "Launch CS2" },
+  { keys: "1–9", desc: "Toggle focus points" },
   { keys: "Esc", desc: "Close modals" },
 ];
 

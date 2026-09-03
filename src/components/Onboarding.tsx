@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowRight, ArrowLeft, Check, Swords, Heart, X, Plus } from "lucide-react";
-import { RULES } from "@/data/routine";
+import { getTodayWarmupItems } from "@/data/routine";
 
-const STEPS = ["welcome", "roster", "rules", "done"] as const;
+const STEPS = ["welcome", "roster", "focus", "done"] as const;
 type Step = (typeof STEPS)[number];
 
 export function Onboarding({ onComplete }: { onComplete: (roster: string[]) => void }) {
@@ -125,19 +125,19 @@ export function Onboarding({ onComplete }: { onComplete: (roster: string[]) => v
               </div>
             )}
 
-            {step === "rules" && (
+            {step === "focus" && (
               <div>
-                <h2 className="mb-1 font-display text-lg font-bold text-ink">Golden Rules</h2>
-                <p className="mb-3 text-[12px] text-inkDim">These are the 4 habits you'll lock in before every session.</p>
+                <h2 className="mb-1 font-display text-lg font-bold text-ink">Today's Warmup</h2>
+                <p className="mb-3 text-[12px] text-inkDim">Your warmup routine changes based on the day of the week.</p>
                 <div className="space-y-2">
-                  {RULES.map((rule, i) => (
-                    <div key={rule.key} className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5">
+                  {getTodayWarmupItems().map((item, i) => (
+                    <div key={item.id} className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5">
                       <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-pastelPink/20 to-pastelLavender/20 font-display text-xs font-bold text-pastelPink">
                         {i + 1}
                       </div>
                       <div>
-                        <div className="text-[13px] font-bold text-ink">{rule.title}</div>
-                        <div className="text-[12px] text-inkSoft">{rule.desc}</div>
+                        <div className="text-[13px] font-bold text-ink">{item.title}</div>
+                        <div className="text-[12px] text-inkSoft">{item.desc}</div>
                       </div>
                     </div>
                   ))}
@@ -153,7 +153,7 @@ export function Onboarding({ onComplete }: { onComplete: (roster: string[]) => v
                   </div>
                 </div>
                 <h2 className="mb-2 font-display text-2xl font-bold text-gradient-pink">You're all set!</h2>
-                <p className="text-[14px] text-inkSoft">Check off your rules, keep your streak, and launch CS2.</p>
+                <p className="text-[14px] text-inkSoft">Check off your warmup, keep your streak, and launch CS2.</p>
               </div>
             )}
           </motion.div>
